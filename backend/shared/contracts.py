@@ -24,6 +24,16 @@ class ExecutionState(StrEnum):
     UNKNOWN_RESULT = "UNKNOWN_RESULT"
 
 
+class EventType(StrEnum):
+    ACTION_AUTHORIZED = "agent.action.authorized"
+    ACTION_BLOCKED = "agent.action.blocked"
+    ACTION_EXECUTING = "agent.action.executing"
+    ACTION_SUCCEEDED = "agent.action.succeeded"
+    ACTION_FAILED = "agent.action.failed"
+    ACTION_CANCELLED = "agent.action.cancelled"
+    ACTION_UNKNOWN_RESULT = "agent.action.unknown_result"
+
+
 class ReasonCode(StrEnum):
     AGENT_DISABLED = "AGENT_DISABLED"
     AGENT_QUARANTINED = "AGENT_QUARANTINED"

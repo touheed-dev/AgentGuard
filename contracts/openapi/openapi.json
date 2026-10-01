@@ -1,6 +1,36 @@
 {
   "components": {
     "schemas": {
+      "AuditVerificationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "checked_events": {
+            "title": "Checked Events",
+            "type": "integer"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "verified",
+          "checked_events"
+        ],
+        "title": "AuditVerificationResponse",
+        "type": "object"
+      },
       "Decision": {
         "additionalProperties": false,
         "properties": {
@@ -396,6 +426,27 @@
         "summary": "Execute Action",
         "tags": [
           "actions"
+        ]
+      }
+    },
+    "/audit/verify": {
+      "get": {
+        "operationId": "verify_audit_audit_verify_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditVerificationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Verify Audit",
+        "tags": [
+          "audit"
         ]
       }
     },

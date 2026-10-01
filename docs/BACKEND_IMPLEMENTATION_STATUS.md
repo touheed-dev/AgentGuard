@@ -12,7 +12,7 @@ The repository is now at the end of Phase 1 and is ready for a Phase 2 persisten
 
 ## Current Architecture
 
-The implemented slice is a Python 3.12+ modular monolith with a FastAPI Gateway, in-process Ed25519 identity, in-memory agent/tool registries, deterministic capability and schema checks, and a receipt-checked stub executor. PostgreSQL, Valkey, and the Docker executor remain future boundaries.
+The implemented slice is a Python 3.12+ modular monolith with a FastAPI Gateway, deterministic Phase 1 security kernel, SQLAlchemy persistence foundation, RFC 8785 audit chain, transactional outbox records, and a replay-safe Valkey adapter. PostgreSQL is the configured authoritative runtime; live containers were not available during this validation.
 
 ## Implemented Features
 
@@ -20,15 +20,17 @@ Phase 0 foundation: shared Pydantic contracts, FastAPI health endpoint, replay-m
 
 Phase 1: Ed25519 token issuance/verification, agent registry, lifecycle/security-state checks, capability enforcement including declared tool capabilities, exact tool registry, basic object-schema validation, deterministic `Gateway.authorize()`, evaluate/execute endpoints, and a stub executor that accepts only one-time Gateway-issued ALLOW/WARN grants.
 
+Phase 2: SQLAlchemy models and repositories for agents, tools, tasks, executions, audit chain state/events, and outbox events; Alembic upgrade/downgrade migration; exact RFC 8785/SHA-256 chain verification; persistence-aware action lifecycle; idempotency lookup; structured `/audit/verify`; and replay-safe Valkey configuration.
+
 ## Missing Features
 
 - Repository and Git baseline
 - Database-backed Python environment configuration
 - Full versioned contract set and security-kernel schemas
-- PostgreSQL-backed authorization state and health dependency checks
-- Policy, risk, approval, breaker, audit, incident, replay, and advanced validation modules
-- SQLAlchemy models, Alembic migrations, PostgreSQL roles, and transactional outbox
-- Valkey event delivery and SSE backend
+- Live PostgreSQL integration verification and health dependency checks
+- Policy, risk, approval, breaker, incident, replay, and advanced validation modules
+- PostgreSQL roles/triggers and production deployment hardening
+- Valkey publication worker and SSE backend
 - Scripted agents and orchestrator
 - LLM Client isolation for Groq, Ollama, and replay
 - Docker executor and seccomp profile
@@ -38,26 +40,25 @@ Phase 1: Ed25519 token issuance/verification, agent registry, lifecycle/security
 
 ## Broken Features
 
-The Phase 1 Gateway is runnable, but persistence, duplicate-request handling, advanced parameter validation, and later containment controls are not implemented yet.
+The Phase 2 persistence foundation is runnable against SQLite tests and configured for PostgreSQL, but live PostgreSQL/Valkey startup was not executed because Docker was unavailable. The current synchronous Gateway still hydrates in-memory registries; repository-backed registry reads are deferred. Publication workers, advanced validation, and later containment controls remain deferred.
 
 ## Security Violations
 
 The following are currently unimplemented controls, not observed runtime bypasses:
 
-- No PostgreSQL-backed Gateway state exists yet.
-- No request replay/idempotency persistence exists yet.
+- PostgreSQL integration was not live-validated in this environment.
+- PostgreSQL role/grant hardening and deployment-specific worker configuration remain to be validated against the live database.
 - No advanced parameter validation exists yet.
 - No approval pause, idempotency, quarantine, or circuit breaker exists.
-- No append-only audit chain exists.
 - No evidence yet proves that agents cannot access credentials, filesystem, databases, HTTP, Docker, or tools directly.
 
 ## Test Coverage
 
-Twenty-two Phase 1 tests pass, including identity, token claims, lifecycle state, capability metadata, exact tool resolution, schema validation, API execution, architecture guards, forged-receipt rejection, grant substitution rejection, and no-execution-after-block. Ruff and mypy are configured but unavailable in the current environment.
+Twenty-seven tests pass across Phase 1 and Phase 2, including identity, token claims, lifecycle state, capability metadata, exact tool resolution, schema validation, API execution, repositories, idempotency, outbox durability, exact audit hashing, tamper detection, concurrent appends, Valkey replay behavior, architecture guards, forged-receipt rejection, and no-execution-after-block. Ruff and mypy are configured but unavailable in the current environment.
 
 ## P0 Status
 
-**Phase 1 complete.** The deterministic Gateway spine is implemented and tested. Persistence and later security modules are intentionally deferred.
+**Phase 2 persistence/audit foundation complete.** The deterministic Gateway spine remains intact, durable core records and audit verification are implemented, and Phase 3+ security intelligence is intentionally deferred.
 
 ## P1 Status
 
@@ -71,8 +72,8 @@ Twenty-two Phase 1 tests pass, including identity, token claims, lifecycle state
 
 Next implementation phase:
 
-1. Add PostgreSQL models and migrations without changing the Gateway decision contract.
-2. Add the transactional outbox and Valkey delivery boundary.
-3. Preserve the Phase 1 in-memory tests as fast security-kernel tests.
+1. Validate the Alembic migration and persistence coordinator against live PostgreSQL in CI or Docker.
+2. Add the Phase 3 deterministic parameter-validation expansion without moving decisions out of Gateway.
+3. Preserve the Phase 1 security tests and Phase 2 audit tests as fast regression gates.
 
 No agent-facing code should bypass the Gateway. Phase 2 must not add persistence shortcuts or move decisions out of the deterministic Gateway.
