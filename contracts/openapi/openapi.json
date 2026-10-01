@@ -452,6 +452,32 @@
         ]
       }
     },
+    "/agents": {
+      "get": {
+        "operationId": "list_agents_agents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Agents Agents Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Agents",
+        "tags": [
+          "agents"
+        ]
+      }
+    },
     "/approvals": {
       "get": {
         "operationId": "list_approvals_approvals_get",
@@ -578,6 +604,50 @@
         ]
       }
     },
+    "/attack-lab/run/{scenario_id}": {
+      "post": {
+        "operationId": "run_attack_scenario_attack_lab_run__scenario_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenario_id",
+            "required": true,
+            "schema": {
+              "title": "Scenario Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Attack Scenario Attack Lab Run  Scenario Id  Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Attack Scenario",
+        "tags": [
+          "attack-lab"
+        ]
+      }
+    },
     "/audit/verify": {
       "get": {
         "operationId": "verify_audit_audit_verify_get",
@@ -596,6 +666,29 @@
         "summary": "Verify Audit",
         "tags": [
           "audit"
+        ]
+      }
+    },
+    "/graph": {
+      "get": {
+        "operationId": "get_graph_graph_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Graph Graph Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Graph",
+        "tags": [
+          "graph"
         ]
       }
     },
@@ -643,6 +736,32 @@
         "summary": "List Incidents",
         "tags": [
           "incidents"
+        ]
+      }
+    },
+    "/tools": {
+      "get": {
+        "operationId": "list_tools_tools_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Tools Tools Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Tools",
+        "tags": [
+          "tools"
         ]
       }
     }

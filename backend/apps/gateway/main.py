@@ -173,3 +173,77 @@ async def verify_audit() -> AuditVerificationResponse:
         checked_events=verification.checked_events,
         error=verification.error,
     )
+
+
+@app.get("/agents", tags=["agents"])
+async def list_agents() -> list[dict[str, Any]]:
+    return [
+        {
+            "agent_id": a.agent_id,
+            "name": a.name,
+            "status": a.status.value,
+            "security_state": a.security_state.value,
+            "capability_version": a.capability_version,
+            "task_id": a.task_id,
+            "security_epoch": a.security_epoch,
+            "allowed_tools": sorted(a.allowed_tools),
+            "scopes": sorted(a.scopes),
+        }
+        for a in gateway.agents.list()
+    ]
+
+
+@app.get("/tools", tags=["tools"])
+async def list_tools() -> list[dict[str, Any]]:
+    return [
+        {
+            "tool_name": t.tool_name,
+            "version": t.version,
+            "description": t.description,
+            "required_capability": t.required_capability,
+            "enabled": t.enabled,
+        }
+        for t in gateway.tools.list()
+    ]
+
+
+@app.get("/graph", tags=["graph"])
+async def get_graph() -> dict[str, Any]:
+    from backend.services.trace_graph import TraceGraphService
+    tg = TraceGraphService()
+    # Populate with current registered agents and communication edges
+    for a in gateway.agents.list():
+        tg.graph.add_node(f"agent:{a.agent_id}", type="agent", label=a.name, security_state=a.security_state.value)
+    for u, v in gateway.communication.edges:
+        tg.record_communication(u, v, "task-1", allowed=True)
+    for inc in gateway.incidents.list():
+        tg.graph.add_node(f"incident:{inc.incident_id}", type="incident", label=inc.reason_code, severity=inc.severity)
+        tg.graph.add_edge(f"agent:{inc.agent_id}", f"incident:{inc.incident_id}", relationship="triggered")
+    return tg.export_graph_json()
+
+
+@app.post("/attack-lab/run/{scenario_id}", tags=["attack-lab"])
+async def run_attack_scenario(scenario_id: str) -> dict[str, Any]:
+    from backend.simulations.attack_lab import AttackLab
+    lab = AttackLab()
+    mapping = {
+        "1": lab.run_scenario_1_prompt_injection,
+        "2": lab.run_scenario_2_capability_violation,
+        "3": lab.run_scenario_3_sensitive_resource,
+        "4": lab.run_scenario_4_unsafe_destination,
+        "5": lab.run_scenario_5_honey_asset,
+        "6": lab.run_scenario_6_cumulative_escalation,
+    }
+    fn = mapping.get(scenario_id.replace("scenario-", ""))
+    if fn is None:
+        return {"error": f"Unknown scenario: {scenario_id}"}
+    res = fn()
+    return {
+        "scenario_id": res.scenario_id,
+        "scenario_name": res.scenario_name,
+        "decision": res.decision.decision.value,
+        "reasons": res.reasons,
+        "agent_security_state": res.agent_security_state.value,
+        "agent_status": res.agent_status.value,
+        "executed": res.executed,
+    }
