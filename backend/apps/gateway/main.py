@@ -5,7 +5,6 @@ from fastapi import FastAPI
 from pydantic import Field
 
 from backend.apps.gateway.runtime import create_runtime
-from backend.services.executor import AuthorizationReceipt
 from backend.services.persistence import PersistenceCoordinator
 from backend.shared.contracts import ActionRequest, Decision, DecisionOutcome, HealthResponse, Reason, ReasonCode, StrictModel
 
@@ -41,7 +40,7 @@ async def health() -> HealthResponse:
 
 
 @app.post("/actions/evaluate", response_model=Decision, tags=["actions"])
-async def evaluate_action(request: GatewayActionRequest) -> Decision:
+async def evaluate_action(request: GatewayActionRequest, track_request: bool = False) -> Decision:
     decision = gateway.authorize(
         request.agent_id,
         request.tool_name,
@@ -50,10 +49,11 @@ async def evaluate_action(request: GatewayActionRequest) -> Decision:
         request.trace_id,
         request.token,
         request.execution_id,
+        request.request_id if track_request else None,
     )
     if persistence is not None:
             persisted = await persistence.persist_authorization(request, decision)
-            if persisted.conflict:
+            if persisted.conflict or (persisted.replayed and persisted.execution.lifecycle_state != "AUTHORIZED"):
                 return Decision(
                     decision=DecisionOutcome.BLOCK,
                     agent_id=request.agent_id,
@@ -61,14 +61,14 @@ async def evaluate_action(request: GatewayActionRequest) -> Decision:
                     task_id=request.task_id,
                     trace_id=request.trace_id,
                     execution_id=request.execution_id,
-                    reasons=(Reason(code=ReasonCode.EXECUTION_DUPLICATE, message="Idempotency key conflicts with an existing execution.", severity="critical", source="persistence"),),
+                    reasons=(Reason(code=ReasonCode.REQUEST_REPLAYED if persisted.replayed else ReasonCode.EXECUTION_DUPLICATE, message="Request identity has already been processed." if persisted.replayed else "Idempotency key conflicts with an existing execution.", severity="critical", source="persistence"),),
                 )
     return decision
 
 
 @app.post("/actions/execute", response_model=ExecutionResponse, tags=["actions"])
 async def execute_action(request: GatewayActionRequest) -> ExecutionResponse:
-    decision = await evaluate_action(request)
+    decision = await evaluate_action(request, track_request=True)
     if decision.decision.value not in {"ALLOW", "WARN"}:
         return ExecutionResponse(decision=decision)
     if persistence is not None:
@@ -99,15 +99,7 @@ async def execute_action(request: GatewayActionRequest) -> ExecutionResponse:
                 )
             )
     try:
-        result = executor.execute(executor.issue_grant(
-            AuthorizationReceipt(
-                decision=decision.decision,
-                agent_id=request.agent_id,
-                tool_name=request.tool_name,
-                arguments=request.arguments,
-                execution_id=decision.execution_id,
-            )
-        ))
+        decision, result = gateway.execute_authorized(decision, request.agent_id, request.tool_name, request.arguments)
     except Exception:
         if persistence is not None:
             await persistence.persist_result(request, decision, "FAILED")

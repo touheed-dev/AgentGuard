@@ -3,8 +3,8 @@ from backend.core.identity.models import AgentStatus, SecurityState
 from backend.core.identity.service import IdentityService
 from dataclasses import replace
 
-from backend.services.executor import AuthorizationReceipt
-from backend.shared.contracts import DecisionOutcome, ReasonCode
+from backend.services.executor import AuthorizationReceipt, StubExecutor
+from backend.shared.contracts import Decision, DecisionOutcome, ReasonCode
 
 
 def token_for(identity: IdentityService, agent_id: str = "researcher-01", task_id: str = "task-1") -> str:
@@ -133,19 +133,10 @@ def test_declared_tool_capability_is_enforced() -> None:
 def test_only_allow_receipts_reach_stub_executor() -> None:
     gateway, identity, executor = create_runtime()
     token = token_for(identity)
-    decision = gateway.authorize("researcher-01", "echo", {"value": "x"}, "task-1", "trace-1", token)
-    receipt = AuthorizationReceipt(decision.decision, "researcher-01", "echo", {"value": "x"}, decision.execution_id)
+    decision, result = gateway.execute("researcher-01", "echo", {"value": "x"}, "task-1", "trace-1", token, "exec-allow")
 
-    assert executor.execute(executor.issue_grant(receipt)) == {"tool": "echo", "value": "x"}
-    assert executor.execution_count == 1
-
-    blocked = receipt.__class__(DecisionOutcome.BLOCK, receipt.agent_id, receipt.tool_name, receipt.arguments, receipt.execution_id)
-    try:
-        executor.execute(blocked)
-    except PermissionError:
-        pass
-    else:
-        raise AssertionError("Blocked receipts must never execute")
+    assert decision.decision == DecisionOutcome.ALLOW
+    assert result == {"tool": "echo", "value": "x"}
     assert executor.execution_count == 1
 
 
@@ -162,9 +153,10 @@ def test_forged_allow_receipt_cannot_execute() -> None:
 
 
 def test_grant_cannot_be_reused_with_changed_arguments() -> None:
-    _, _, executor = create_runtime()
+    issuer = object()
+    executor = StubExecutor(issuer)
     original = AuthorizationReceipt(DecisionOutcome.ALLOW, "researcher-01", "echo", {"value": "x"}, "exec-1")
-    granted = executor.issue_grant(original)
+    granted = executor.issue_grant(original, issuer)
     substituted = replace(granted, arguments={"value": "changed"})
 
     try:
@@ -182,3 +174,24 @@ def test_identical_inputs_produce_identical_decisions() -> None:
     second = gateway.authorize("researcher-01", "echo", {"value": "x"}, "task-1", "trace-1", token)
 
     assert first == second
+
+
+def test_gateway_rejects_repeated_execution_identity() -> None:
+    gateway, identity, _ = create_runtime()
+    token = token_for(identity)
+    first, _ = gateway.execute("researcher-01", "echo", {"value": "x"}, "task-1", "trace-1", token, "exec-once")
+    second, _ = gateway.execute("researcher-01", "echo", {"value": "x"}, "task-1", "trace-1", token, "exec-once")
+
+    assert first.decision == DecisionOutcome.ALLOW
+    assert second.decision == DecisionOutcome.BLOCK
+    assert second.reasons[0].code == ReasonCode.EXECUTION_DUPLICATE
+
+
+def test_gateway_rejects_forged_authorized_decision() -> None:
+    gateway, _, _ = create_runtime()
+    forged = Decision(decision=DecisionOutcome.ALLOW, agent_id="researcher-01", tool_name="echo", task_id="task-1", trace_id="trace", execution_id="forged")
+
+    decision, result = gateway.execute_authorized(forged, "researcher-01", "echo", {"value": "x"})
+
+    assert decision.decision == DecisionOutcome.BLOCK
+    assert result is None

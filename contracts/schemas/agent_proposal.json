@@ -1,6 +1,11 @@
 {
   "additionalProperties": false,
   "properties": {
+    "agent_id": {
+      "default": "",
+      "title": "Agent Id",
+      "type": "string"
+    },
     "arguments": {
       "additionalProperties": true,
       "title": "Arguments",
@@ -18,6 +23,16 @@
     },
     "source": {
       "title": "Source",
+      "type": "string"
+    },
+    "task_id": {
+      "default": "",
+      "title": "Task Id",
+      "type": "string"
+    },
+    "trace_id": {
+      "default": "",
+      "title": "Trace Id",
       "type": "string"
     }
   },

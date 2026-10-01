@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
@@ -69,6 +70,19 @@ class AgentProposal(StrictModel):
     arguments: dict[str, Any] = Field(default_factory=dict)
     source: str
     confidence: float = Field(ge=0, le=1)
+    agent_id: str = ""
+    task_id: str = ""
+    trace_id: str = ""
+
+
+@dataclass(frozen=True)
+class AuthorizationReceipt:
+    decision: DecisionOutcome
+    agent_id: str
+    tool_name: str
+    arguments: dict[str, Any]
+    execution_id: str
+    grant_id: str = ""
 
 
 class ActionRequest(StrictModel):

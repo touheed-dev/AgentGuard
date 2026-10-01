@@ -9,8 +9,9 @@
 - Phase 0: complete and published as `v0.1.0-phase0`.
 - Phase 1: complete and published as `v0.2.0-phase1`.
 - Phase 2: implemented locally; persistence/audit foundation validated with SQLite and migration checks. Live PostgreSQL/Valkey execution remains environment-limited.
-- Phase 3: deterministic validation, task consistency, risk, and decision precedence implemented and tested locally; checkpoint pending.
-- Phase 4+: not started.
+- Phase 3: complete and published as `v0.4.0-phase3`.
+- Phase 4: four scripted agents, Gateway-only orchestration, and side-effect-free replay implemented and tested locally; checkpoint pending.
+- Phase 5+: not started.
 
 ## Current Validation
 
@@ -36,4 +37,5 @@
 | Phase 0 | `0942a53` / `v0.1.0-phase0` | Published |
 | Phase 1 | `f1a9de0` / `v0.2.0-phase1` | Published |
 | Phase 2 | `4836b67` / `v0.3.0-phase2` | Published |
-| Phase 3 | pending | Ready to checkpoint |
+| Phase 3 | `45d587d` / `v0.4.0-phase3` | Published |
+| Phase 4 | pending | Ready to checkpoint |

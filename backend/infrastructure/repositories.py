@@ -74,6 +74,10 @@ class ExecutionRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_by_request_id(self, session: AsyncSession, request_id: str) -> ExecutionRecord | None:
+        result = await session.execute(select(ExecutionRecord).where(ExecutionRecord.request_id == request_id))
+        return result.scalar_one_or_none()
+
     async def create_requested(
         self,
         session: AsyncSession,

@@ -59,6 +59,8 @@ Implement scripted Planner, Researcher, Coder, and Executor agents that can only
 
 ## Phase 5: Containment and Human Control
 
+Phase 4 is complete. Scripted agents and orchestrator actions use `Gateway.execute()`, replay calls the same authorization path without executing tools, and canonical replay hashes include complete action inputs and decisions. Persistence-backed request and execution claims remain authoritative when enabled.
+
 Add PostgreSQL-backed approval state transitions, redacted structural approval payloads, action fingerprints and freshness checks, execution idempotency, circuit breaker persistence, incidents, quarantine, HoneyTool, Honeytoken, and communication-graph enforcement. Honey references must be detected even on early capability denial, with zero tool execution.
 
 ## Phase 6: Frontend Contract Surface

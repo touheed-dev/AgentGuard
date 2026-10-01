@@ -24,13 +24,15 @@ Phase 2: SQLAlchemy models and repositories for agents, tools, tasks, executions
 
 Phase 3: deterministic parameter validation for traversal, sensitive resources, shell controls, URL schemes/allowlists/private and special destinations, deep encodings, payload size, and malformed values; advisory task consistency; bounded risk factors and thresholds; hard-signal floors; and Gateway decision precedence.
 
+Phase 4: scripted Planner, Researcher, Coder, and Executor agents; Gateway-owned execution; proposal identity binding; deterministic orchestrator traces; side-effect-free replay; request replay protection; one-time execution claims; and canonical replay trace hashes.
+
 ## Missing Features
 
 - Repository and Git baseline
 - Database-backed Python environment configuration
 - Full versioned contract set and security-kernel schemas
 - Live PostgreSQL integration verification and health dependency checks
-- Policy, approval, breaker, incident, replay, and advanced behavioral validation modules
+- Policy, approval, breaker, incident, and advanced behavioral validation modules
 - PostgreSQL roles/triggers and production deployment hardening
 - Valkey publication worker and SSE backend
 - Scripted agents and orchestrator
@@ -56,11 +58,11 @@ The following are currently unimplemented controls, not observed runtime bypasse
 
 ## Test Coverage
 
-Thirty-four tests pass across Phase 1, Phase 2, and Phase 3, including identity, token claims, lifecycle state, capability metadata, exact tool resolution, schema validation, API execution, repositories, idempotency, outbox durability, exact audit hashing, tamper detection, concurrent appends, Valkey replay behavior, traversal/URL/shell defenses, task consistency, risk thresholds, hard-signal reasons, architecture guards, forged-receipt rejection, and no-execution-after-block. Ruff and mypy are configured but unavailable in the current environment.
+Thirty-nine tests pass across Phase 1 through Phase 4, including identity, token claims, lifecycle state, capability metadata, exact tool resolution, schema validation, API execution, repositories, idempotency, outbox durability, exact audit hashing, tamper detection, concurrent appends, Valkey replay behavior, traversal/URL/shell defenses, task consistency, risk thresholds, hard-signal reasons, four-agent orchestration, side-effect-free replay, request replay protection, architecture guards, issuer-bound executor grants, and no-execution-after-block. Ruff and mypy are configured but unavailable in the current environment.
 
 ## P0 Status
 
-**Phase 3 validation/risk foundation complete.** The deterministic Gateway, persistence/audit foundation, parameter validation, task consistency, and risk/decision layer are implemented. Phase 4+ orchestration and containment are intentionally deferred.
+**Phase 4 agent/replay foundation complete.** The deterministic Gateway, persistence/audit foundation, validation/risk layer, four scripted agents, orchestrator, and side-effect-free replay are implemented. Phase 5 containment is next.
 
 ## P1 Status
 
@@ -74,8 +76,8 @@ Thirty-four tests pass across Phase 1, Phase 2, and Phase 3, including identity,
 
 Next implementation phase:
 
-1. Implement scripted Planner, Researcher, Coder, and Executor agents through Gateway-only interfaces.
-2. Add deterministic trace/replay fixtures without an LLM dependency.
-3. Preserve the Phase 1-3 security tests as fast regression gates and validate persistence against live PostgreSQL when Docker is available.
+1. Implement PostgreSQL-backed approvals and freshness checks.
+2. Add circuit breaker, incidents, honey assets, communication policy, and quarantine.
+3. Preserve the Phase 1-4 security tests as fast regression gates and validate persistence against live PostgreSQL when Docker is available.
 
 No agent-facing code should bypass the Gateway. Phase 2 must not add persistence shortcuts or move decisions out of the deterministic Gateway.

@@ -1,28 +1,20 @@
-from dataclasses import dataclass
 import hashlib
 import json
 from typing import Any
 from uuid import uuid4
 
-from backend.shared.contracts import DecisionOutcome
-
-
-@dataclass(frozen=True)
-class AuthorizationReceipt:
-    decision: DecisionOutcome
-    agent_id: str
-    tool_name: str
-    arguments: dict[str, Any]
-    execution_id: str
-    grant_id: str = ""
+from backend.shared.contracts import AuthorizationReceipt, DecisionOutcome
 
 
 class StubExecutor:
-    def __init__(self) -> None:
+    def __init__(self, issuer: object) -> None:
+        self._issuer = issuer
         self.execution_count = 0
         self._grants: dict[str, str] = {}
 
-    def issue_grant(self, receipt: AuthorizationReceipt) -> AuthorizationReceipt:
+    def issue_grant(self, receipt: AuthorizationReceipt, issuer: object) -> AuthorizationReceipt:
+        if issuer is not self._issuer:
+            raise PermissionError("Only the Gateway may issue executor grants.")
         grant_id = str(uuid4())
         granted = AuthorizationReceipt(
             receipt.decision,

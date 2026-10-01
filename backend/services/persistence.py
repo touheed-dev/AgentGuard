@@ -21,6 +21,7 @@ class PersistedAuthorization:
     execution: ExecutionRecord
     duplicate: bool
     conflict: bool = False
+    replayed: bool = False
 
 
 class PersistenceCoordinator:
@@ -34,6 +35,9 @@ class PersistenceCoordinator:
         async with self.sessions() as session:
             async with session.begin():
                 existing = await self.executions.get_by_idempotency(session, request)
+                request_match = await self.executions.get_by_request_id(session, request.request_id)
+                if request_match is not None:
+                    return PersistedAuthorization(request_match, True, request_match.request_fingerprint != self.fingerprint(request), True)
                 if existing is not None:
                     return PersistedAuthorization(
                         existing,
@@ -102,6 +106,8 @@ class PersistenceCoordinator:
             "task_id": request.task_id,
             "tool_name": request.tool_name,
             "trace_id": request.trace_id,
+            "execution_id": request.execution_id,
+            "idempotency_key": request.idempotency_key,
         }
         return hashlib.sha256(rfc8785.dumps(payload)).hexdigest()
 

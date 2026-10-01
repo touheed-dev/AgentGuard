@@ -44,7 +44,7 @@ class TaskRecord(Base):
 
 class ExecutionRecord(Base):
     __tablename__ = "executions"
-    __table_args__ = (UniqueConstraint("agent_id", "task_id", "tool_name", "idempotency_key"),)
+    __table_args__ = (UniqueConstraint("agent_id", "task_id", "tool_name", "idempotency_key"), UniqueConstraint("request_id"))
 
     execution_id: Mapped[str] = mapped_column(String(128), primary_key=True)
     idempotency_key: Mapped[str] = mapped_column(String(255), nullable=False)

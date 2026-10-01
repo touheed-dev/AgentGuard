@@ -350,6 +350,18 @@
     "/actions/evaluate": {
       "post": {
         "operationId": "evaluate_action_actions_evaluate_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "track_request",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Track Request",
+              "type": "boolean"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {

@@ -20,6 +20,14 @@ def create_runtime() -> tuple[Gateway, IdentityService, StubExecutor]:
                 allowed_tools=frozenset({"echo", "get_demo_data"}),
                 scopes=frozenset({"tool:echo", "tool:get_demo_data"}),
             ),
+            *(Agent(
+                agent_id=agent_id,
+                name=agent_id,
+                task_id="task-1",
+                capability_version="cap-v1",
+                allowed_tools=frozenset({"echo", "get_demo_data"}),
+                scopes=frozenset({"tool:echo", "tool:get_demo_data"}),
+            ) for agent_id in ("planner-01", "coder-01", "executor-01")),
         )
     )
     tools = ToolRegistry(
@@ -45,10 +53,14 @@ def create_runtime() -> tuple[Gateway, IdentityService, StubExecutor]:
             ),
         )
     )
+    executor_issuer = object()
+    executor = StubExecutor(executor_issuer)
     return Gateway(
         identity,
         agents,
         CapabilityService(),
         tools,
         task_consistency=TaskConsistencyService((TaskDefinition(task_id="task-1", label="demo", allowed_tools=frozenset({"echo", "get_demo_data"})),)),
-    ), identity, StubExecutor()
+        executor=executor,
+        executor_issuer=executor_issuer,
+    ), identity, executor
