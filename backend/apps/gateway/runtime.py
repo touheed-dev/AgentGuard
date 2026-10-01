@@ -4,6 +4,7 @@ from backend.core.identity.models import Agent
 from backend.core.identity.registry import AgentRegistry
 from backend.core.identity.service import IdentityService
 from backend.core.tools.registry import ToolDefinition, ToolRegistry
+from backend.core.task_consistency.service import TaskConsistencyService, TaskDefinition
 from backend.services.executor import StubExecutor
 
 
@@ -44,4 +45,10 @@ def create_runtime() -> tuple[Gateway, IdentityService, StubExecutor]:
             ),
         )
     )
-    return Gateway(identity, agents, CapabilityService(), tools), identity, StubExecutor()
+    return Gateway(
+        identity,
+        agents,
+        CapabilityService(),
+        tools,
+        task_consistency=TaskConsistencyService((TaskDefinition(task_id="task-1", label="demo", allowed_tools=frozenset({"echo", "get_demo_data"})),)),
+    ), identity, StubExecutor()

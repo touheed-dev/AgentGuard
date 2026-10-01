@@ -53,6 +53,8 @@ Add normalized parameter validation for paths, symlinks, secrets/configuration, 
 
 ## Phase 4: Agents and Replay
 
+Phase 3 is complete. The Gateway now applies deterministic parameter validation, advisory task consistency, risk factors/thresholds, hard-signal floors, and decision precedence after identity, capability, tool, and schema checks. Phase 4 must use these services rather than creating a parallel authorization path.
+
 Implement scripted Planner, Researcher, Coder, and Executor agents that can only submit proposals through typed Gateway interfaces. Add a persistent async orchestrator, deterministic clock/ID providers, trace fixtures, and replay comparison using exact hashes where possible and normalized trace hashes otherwise.
 
 ## Phase 5: Containment and Human Control

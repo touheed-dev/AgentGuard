@@ -1,6 +1,44 @@
 {
   "additionalProperties": false,
   "properties": {
+    "allowed_destinations": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Allowed Destinations",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "behavioral_anomaly": {
+      "default": 0,
+      "maximum": 10,
+      "minimum": 0,
+      "title": "Behavioral Anomaly",
+      "type": "integer"
+    },
+    "command_fields": {
+      "default": [
+        "cmd",
+        "code",
+        "command",
+        "script",
+        "shell"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Command Fields",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "data_sensitivity": {
+      "default": 0,
+      "maximum": 20,
+      "minimum": 0,
+      "title": "Data Sensitivity",
+      "type": "integer"
+    },
     "description": {
       "title": "Description",
       "type": "string"
@@ -10,14 +48,51 @@
       "title": "Enabled",
       "type": "boolean"
     },
+    "hard_signal": {
+      "default": false,
+      "title": "Hard Signal",
+      "type": "boolean"
+    },
+    "hard_signal_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Hard Signal Reason"
+    },
     "input_schema": {
       "additionalProperties": true,
       "title": "Input Schema",
       "type": "object"
     },
+    "irreversibility": {
+      "default": 0,
+      "maximum": 10,
+      "minimum": 0,
+      "title": "Irreversibility",
+      "type": "integer"
+    },
+    "max_payload_bytes": {
+      "default": 65536,
+      "minimum": 1,
+      "title": "Max Payload Bytes",
+      "type": "integer"
+    },
     "required_capability": {
       "title": "Required Capability",
       "type": "string"
+    },
+    "sensitivity": {
+      "default": 0,
+      "maximum": 25,
+      "minimum": 0,
+      "title": "Sensitivity",
+      "type": "integer"
     },
     "tool_name": {
       "minLength": 1,
