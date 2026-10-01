@@ -95,6 +95,7 @@ class ActionRequest(StrictModel):
     trace_id: str = Field(min_length=1)
     idempotency_key: str = Field(min_length=1)
     lifecycle_state: ExecutionState = ExecutionState.REQUESTED
+    approval_id: str | None = None
 
 
 class Reason(StrictModel):

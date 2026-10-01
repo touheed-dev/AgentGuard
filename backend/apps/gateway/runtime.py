@@ -1,10 +1,15 @@
+from backend.core.approval.service import ApprovalService
 from backend.core.capabilities.service import CapabilityService
+from backend.core.communication.service import CommunicationService
 from backend.core.gateway import Gateway
 from backend.core.identity.models import Agent
 from backend.core.identity.registry import AgentRegistry
 from backend.core.identity.service import IdentityService
 from backend.core.tools.registry import ToolDefinition, ToolRegistry
 from backend.core.task_consistency.service import TaskConsistencyService, TaskDefinition
+from backend.core.breaker.service import BreakerService
+from backend.core.incidents.service import IncidentService
+from backend.deception.honey import HoneyAsset, HoneyAssetRegistry
 from backend.services.executor import StubExecutor
 
 
@@ -55,6 +60,17 @@ def create_runtime() -> tuple[Gateway, IdentityService, StubExecutor]:
     )
     executor_issuer = object()
     executor = StubExecutor(executor_issuer)
+    honey_assets = HoneyAssetRegistry((HoneyAsset("honeytoken-01", "token", "AG-HONEY-7F92-XK11"),))
+    approvals = ApprovalService()
+    communication = CommunicationService(
+        edges=frozenset({
+            ("planner-01", "researcher-01"),
+            ("researcher-01", "planner-01"),
+            ("planner-01", "coder-01"),
+            ("coder-01", "executor-01"),
+        }),
+        agents=agents,
+    )
     return Gateway(
         identity,
         agents,
@@ -63,4 +79,9 @@ def create_runtime() -> tuple[Gateway, IdentityService, StubExecutor]:
         task_consistency=TaskConsistencyService((TaskDefinition(task_id="task-1", label="demo", allowed_tools=frozenset({"echo", "get_demo_data"})),)),
         executor=executor,
         executor_issuer=executor_issuer,
+        honey_assets=honey_assets,
+        breaker=BreakerService(),
+        incidents=IncidentService(),
+        approvals=approvals,
+        communication=communication,
     ), identity, executor

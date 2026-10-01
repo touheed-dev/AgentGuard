@@ -24,6 +24,18 @@
       "title": "Agent Id",
       "type": "string"
     },
+    "approval_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approval Id"
+    },
     "arguments": {
       "additionalProperties": true,
       "title": "Arguments",

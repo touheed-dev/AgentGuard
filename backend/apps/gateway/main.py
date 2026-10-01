@@ -69,8 +69,12 @@ async def evaluate_action(request: GatewayActionRequest, track_request: bool = F
 @app.post("/actions/execute", response_model=ExecutionResponse, tags=["actions"])
 async def execute_action(request: GatewayActionRequest) -> ExecutionResponse:
     decision = await evaluate_action(request, track_request=True)
-    if decision.decision.value not in {"ALLOW", "WARN"}:
+    if decision.decision.value not in {"ALLOW", "WARN", "REQUIRE_APPROVAL"}:
         return ExecutionResponse(decision=decision)
+
+    if decision.decision == DecisionOutcome.REQUIRE_APPROVAL and not request.approval_id:
+        return ExecutionResponse(decision=decision)
+
     if persistence is not None:
         persisted = await persistence.persist_authorization(request, decision)
         if persisted.conflict or (persisted.duplicate and persisted.execution.lifecycle_state in {"SUCCEEDED", "EXECUTING", "UNKNOWN_RESULT"}):
@@ -99,14 +103,64 @@ async def execute_action(request: GatewayActionRequest) -> ExecutionResponse:
                 )
             )
     try:
-        decision, result = gateway.execute_authorized(decision, request.agent_id, request.tool_name, request.arguments)
+        decision, result = gateway.execute_authorized(
+            decision, request.agent_id, request.tool_name, request.arguments, approval_id=request.approval_id
+        )
     except Exception:
         if persistence is not None:
             await persistence.persist_result(request, decision, "FAILED")
         raise
+
+    if decision.reasons and any(r.code == ReasonCode.RESULT_UNKNOWN for r in decision.reasons):
+        if persistence is not None:
+            await persistence.persist_result(request, decision, "UNKNOWN_RESULT")
+        return ExecutionResponse(decision=decision, result=None)
+
+    if decision.decision == DecisionOutcome.BLOCK:
+        if persistence is not None:
+            await persistence.persist_result(request, decision, "FAILED")
+        return ExecutionResponse(decision=decision, result=None)
+
     if persistence is not None:
         await persistence.persist_result(request, decision, "SUCCEEDED", result)
     return ExecutionResponse(decision=decision, result=result)
+
+
+@app.post("/approvals/{approval_id}/approve", tags=["approvals"])
+async def approve_action(approval_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    approval = gateway.approvals.approve(approval_id, payload)
+    return {"approval_id": approval.approval_id, "status": approval.status.value, "fingerprint": approval.fingerprint}
+
+
+@app.post("/approvals/{approval_id}/reject", tags=["approvals"])
+async def reject_action(approval_id: str) -> dict[str, Any]:
+    approval = gateway.approvals.reject(approval_id)
+    return {"approval_id": approval.approval_id, "status": approval.status.value}
+
+
+@app.get("/approvals", tags=["approvals"])
+async def list_approvals() -> list[dict[str, Any]]:
+    return [
+        {"approval_id": a.approval_id, "status": a.status.value, "expires_at": a.expires_at, "fields": a.fields}
+        for a in gateway.approvals.list()
+    ]
+
+
+@app.get("/incidents", tags=["incidents"])
+async def list_incidents() -> list[dict[str, Any]]:
+    return [
+        {
+            "incident_id": inc.incident_id,
+            "agent_id": inc.agent_id,
+            "task_id": inc.task_id,
+            "trace_id": inc.trace_id,
+            "reason_code": inc.reason_code,
+            "severity": inc.severity,
+            "state": inc.state.value,
+            "created_at": inc.created_at,
+        }
+        for inc in gateway.incidents.list()
+    ]
 
 
 @app.get("/audit/verify", response_model=AuditVerificationResponse, tags=["audit"])

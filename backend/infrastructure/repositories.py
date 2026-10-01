@@ -6,7 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.identity.models import Agent
 from backend.core.tools.registry import ToolDefinition
-from backend.infrastructure.models import AgentRecord, ExecutionRecord, ToolRecord
+from backend.infrastructure.models import (
+    AgentRecord,
+    ApprovalRecord,
+    ExecutionRecord,
+    HoneyAssetRecord,
+    IncidentRecord,
+    ToolRecord,
+)
 from backend.shared.contracts import ActionRequest, Decision
 
 
@@ -132,3 +139,78 @@ class ExecutionRepository:
         record.lifecycle_state = state
         await session.flush()
         return record
+
+
+class ApprovalRepository:
+    async def create(self, session: AsyncSession, approval_id: str, fingerprint: str, status: str, expires_at: datetime, fields: dict[str, Any]) -> ApprovalRecord:
+        record = ApprovalRecord(
+            approval_id=approval_id,
+            fingerprint=fingerprint,
+            status=status,
+            expires_at=expires_at,
+            fields_json=json.dumps(fields, sort_keys=True),
+        )
+        session.add(record)
+        await session.flush()
+        return record
+
+    async def get(self, session: AsyncSession, approval_id: str) -> ApprovalRecord | None:
+        return await session.get(ApprovalRecord, approval_id)
+
+    async def update_status(self, session: AsyncSession, approval_id: str, status: str) -> ApprovalRecord:
+        record = await session.get(ApprovalRecord, approval_id)
+        if record is None:
+            raise KeyError(approval_id)
+        record.status = status
+        await session.flush()
+        return record
+
+
+class IncidentRepository:
+    async def create(
+        self,
+        session: AsyncSession,
+        incident_id: str,
+        agent_id: str,
+        task_id: str,
+        trace_id: str,
+        reason_code: str,
+        severity: str,
+        state: str,
+        dedup_key: str,
+        details: dict[str, Any] | None = None,
+    ) -> IncidentRecord:
+        record = IncidentRecord(
+            incident_id=incident_id,
+            agent_id=agent_id,
+            task_id=task_id,
+            trace_id=trace_id,
+            reason_code=reason_code,
+            severity=severity,
+            state=state,
+            dedup_key=dedup_key,
+            details_json=json.dumps(details or {}, sort_keys=True),
+        )
+        session.add(record)
+        await session.flush()
+        return record
+
+    async def get_by_dedup_key(self, session: AsyncSession, dedup_key: str) -> IncidentRecord | None:
+        result = await session.execute(select(IncidentRecord).where(IncidentRecord.dedup_key == dedup_key))
+        return result.scalar_one_or_none()
+
+    async def list(self, session: AsyncSession) -> list[IncidentRecord]:
+        result = await session.execute(select(IncidentRecord).order_by(IncidentRecord.created_at.desc()))
+        return list(result.scalars().all())
+
+
+class HoneyAssetRepository:
+    async def create(self, session: AsyncSession, asset_id: str, kind: str, marker: str) -> HoneyAssetRecord:
+        record = HoneyAssetRecord(asset_id=asset_id, kind=kind, marker=marker)
+        session.add(record)
+        await session.flush()
+        return record
+
+    async def list(self, session: AsyncSession) -> list[HoneyAssetRecord]:
+        result = await session.execute(select(HoneyAssetRecord))
+        return list(result.scalars().all())

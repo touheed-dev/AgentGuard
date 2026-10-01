@@ -6,11 +6,18 @@ from uuid import uuid4
 from backend.shared.contracts import AuthorizationReceipt, DecisionOutcome
 
 
+class UnknownExecutionError(Exception):
+    """Raised when execution outcome cannot be reliably determined (e.g. timeout, crash)."""
+    pass
+
+
 class StubExecutor:
     def __init__(self, issuer: object) -> None:
         self._issuer = issuer
         self.execution_count = 0
         self._grants: dict[str, str] = {}
+        self.force_unknown = False
+        self.force_failure = False
 
     def issue_grant(self, receipt: AuthorizationReceipt, issuer: object) -> AuthorizationReceipt:
         if issuer is not self._issuer:
@@ -37,6 +44,10 @@ class StubExecutor:
             raise PermissionError("Only Gateway-issued ALLOW and WARN receipts may reach execution.")
         del self._grants[receipt.grant_id]
         self.execution_count += 1
+        if self.force_unknown:
+            raise UnknownExecutionError("Execution outcome cannot be reliably determined.")
+        if self.force_failure:
+            raise RuntimeError("Stub execution failed with an explicit error.")
         if receipt.tool_name == "echo":
             return {"tool": "echo", "value": receipt.arguments.get("value")}
         if receipt.tool_name == "get_demo_data":

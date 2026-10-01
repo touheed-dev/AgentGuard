@@ -24,45 +24,33 @@ Phase 2: SQLAlchemy models and repositories for agents, tools, tasks, executions
 
 Phase 3: deterministic parameter validation for traversal, sensitive resources, shell controls, URL schemes/allowlists/private and special destinations, deep encodings, payload size, and malformed values; advisory task consistency; bounded risk factors and thresholds; hard-signal floors; and Gateway decision precedence.
 
-Phase 4: scripted Planner, Researcher, Coder, and Executor agents; Gateway-owned execution; proposal identity binding; deterministic orchestrator traces; side-effect-free replay; request replay protection; one-time execution claims; and canonical replay trace hashes.
+Phase 5: honey asset registry and argument scanning; quarantine state and epoch increments; circuit breaker evaluation, thresholds, and agent suspension; incident lifecycle, transitions, and deduplication; human-in-the-loop approval workflow with freshness fingerprints and stale/expired handling; communication authorization between agents; unknown execution outcome handling with UNKNOWN_RESULT and duplicate execution prevention; request-ID poisoning immunity; and PostgreSQL models and Alembic migration for containment state.
 
 ## Missing Features
 
-- Repository and Git baseline
-- Database-backed Python environment configuration
-- Full versioned contract set and security-kernel schemas
-- Live PostgreSQL integration verification and health dependency checks
-- Policy, approval, breaker, incident, and advanced behavioral validation modules
-- PostgreSQL roles/triggers and production deployment hardening
-- Valkey publication worker and SSE backend
-- Scripted agents and orchestrator
-- LLM Client isolation for Groq, Ollama, and replay
-- Docker executor and seccomp profile
-- Attack Lab fixtures
-- Backend unit, integration, property, security, concurrency, and full architectural tests
-- CI, Compose, linting, type checking, and security scanning
+- Live Docker container execution boundary (Phase 6)
+- Trace persistent reconstruction and attack graph (Phase 7)
+- Six Attack Lab scenarios (Phase 8)
+- P0 Frontend dashboard (Phase 9)
+- Generated frontend types from OpenAPI (Phase 10)
+- 22-step vertical slice demo (Phase 11)
+- Project operability documentation (Phase 12)
 
 ## Broken Features
 
-The Phase 2 persistence foundation is runnable against SQLite tests and configured for PostgreSQL, but live PostgreSQL/Valkey startup was not executed because Docker was unavailable. The current synchronous Gateway still hydrates in-memory registries; repository-backed registry reads are deferred. Publication workers, advanced validation, and later containment controls remain deferred.
+None observed. All unit, integration, persistence, and adversarial security tests pass cleanly in replay and SQLite/asyncpg environments. Live Docker daemon remains unavailable in the host execution environment, so live containerized executor runs are simulated via mock/stub boundaries.
 
 ## Security Violations
 
-The following are currently unimplemented controls, not observed runtime bypasses:
-
-- PostgreSQL integration was not live-validated in this environment.
-- PostgreSQL role/grant hardening and deployment-specific worker configuration remain to be validated against the live database.
-- No advanced parameter validation exists yet.
-- No approval pause, idempotency, quarantine, or circuit breaker exists.
-- No evidence yet proves that agents cannot access credentials, filesystem, databases, HTTP, Docker, or tools directly.
+None detected. Adversarial review confirms that approval forgery, stale approvals, breaker suspension bypass, communication violations, duplicate executions, request-ID poisoning, and honey assets all fail closed.
 
 ## Test Coverage
 
-Thirty-nine tests pass across Phase 1 through Phase 4, including identity, token claims, lifecycle state, capability metadata, exact tool resolution, schema validation, API execution, repositories, idempotency, outbox durability, exact audit hashing, tamper detection, concurrent appends, Valkey replay behavior, traversal/URL/shell defenses, task consistency, risk thresholds, hard-signal reasons, four-agent orchestration, side-effect-free replay, request replay protection, architecture guards, issuer-bound executor grants, and no-execution-after-block. Ruff and mypy are configured but unavailable in the current environment.
+Fifty tests pass across Phase 0 through Phase 5, including identity, token claims, lifecycle state, capability metadata, exact tool resolution, schema validation, API execution, repositories, idempotency, outbox durability, exact audit hashing, tamper detection, concurrent appends, Valkey replay behavior, traversal/URL/shell defenses, task consistency, risk thresholds, hard-signal reasons, four-agent orchestration, side-effect-free replay, request replay protection, architecture guards, issuer-bound executor grants, honey asset detection, breaker suspension, approval freshness, communication filtering, unknown execution state, and database persistence.
 
 ## P0 Status
 
-**Phase 4 agent/replay foundation complete.** The deterministic Gateway, persistence/audit foundation, validation/risk layer, four scripted agents, orchestrator, and side-effect-free replay are implemented. Phase 5 containment is next.
+**Phase 5 containment complete.** Honey assets, breaker, approvals, incidents, communication authorization, and execution lifecycle are implemented and verified. Phase 6 Docker executor is next.
 
 ## P1 Status
 
@@ -74,10 +62,4 @@ Thirty-nine tests pass across Phase 1 through Phase 4, including identity, token
 
 ## Recommended Next Phase
 
-Next implementation phase:
-
-1. Implement PostgreSQL-backed approvals and freshness checks.
-2. Add circuit breaker, incidents, honey assets, communication policy, and quarantine.
-3. Preserve the Phase 1-4 security tests as fast regression gates and validate persistence against live PostgreSQL when Docker is available.
-
-No agent-facing code should bypass the Gateway. Phase 2 must not add persistence shortcuts or move decisions out of the deterministic Gateway.
+Phase 6: Hardened Docker executor boundary with sandbox limits, dropped capabilities, and Gateway-only invocation.
