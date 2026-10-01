@@ -43,6 +43,8 @@ Required proof: an agent can perform one allowed registered action, an unknown o
 
 ## Phase 2: Persistence and Events
 
+Phase 1 is complete. The Gateway spine now owns Ed25519 token verification, in-memory registries, declared capability checks, exact tool resolution, basic object-schema validation, deterministic decisions, and a one-time fingerprint-bound grant executor. These behaviors are covered by 22 tests and remain the baseline for Phase 2.
+
 Add SQLAlchemy 2 async models and Alembic migrations for all PRD tables, PostgreSQL roles and append-only audit protections, the transactional outbox, and the Valkey event bus. Add typed event schemas and SSE delivery. Recompute security counters from PostgreSQL when Valkey is unavailable and fail closed for critical tools.
 
 ## Phase 3: Deterministic Security Evaluation

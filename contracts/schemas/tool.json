@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "enabled": {
+      "default": true,
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "input_schema": {
+      "additionalProperties": true,
+      "title": "Input Schema",
+      "type": "object"
+    },
+    "required_capability": {
+      "title": "Required Capability",
+      "type": "string"
+    },
+    "tool_name": {
+      "minLength": 1,
+      "title": "Tool Name",
+      "type": "string"
+    },
+    "version": {
+      "minLength": 1,
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tool_name",
+    "version",
+    "description",
+    "input_schema",
+    "required_capability"
+  ],
+  "title": "ToolDefinition",
+  "type": "object"
+}

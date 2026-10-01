@@ -5,15 +5,19 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from backend.apps.gateway.main import app
+from backend.core.identity.models import Agent
+from backend.core.tools.registry import ToolDefinition
 from backend.shared.contracts import ActionRequest, AgentProposal, Decision, HealthResponse, Reason
 
 
 CONTRACTS = {
 	"action_request": ActionRequest,
+	"agent": Agent,
 	"agent_proposal": AgentProposal,
 	"decision": Decision,
 	"health": HealthResponse,
 	"reason": Reason,
+	"tool": ToolDefinition,
 }
 
 

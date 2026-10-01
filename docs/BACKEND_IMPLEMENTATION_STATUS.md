@@ -6,26 +6,27 @@
 
 ## Audit Summary
 
-The initial audit found only the authoritative PRD. Phase 0 documentation and a minimal backend foundation now exist; no Git metadata, database migrations, security kernel, or executable tool plane exists yet.
+The initial audit found only the authoritative PRD. Phase 0 and the Phase 1 deterministic Gateway spine now exist; persistence and later control-plane modules remain deferred.
 
-This is a clean Phase 0 starting point, not an existing implementation to audit incrementally.
+The repository is now at the end of Phase 1 and is ready for a Phase 2 persistence checkpoint.
 
 ## Current Architecture
 
-Not implemented. The locked target architecture is a Python 3.12+ modular monolith with a FastAPI Gateway, deterministic in-process security kernel, PostgreSQL as the source of truth, Valkey for event delivery and ephemeral counters, and a separate Docker executor boundary.
+The implemented slice is a Python 3.12+ modular monolith with a FastAPI Gateway, in-process Ed25519 identity, in-memory agent/tool registries, deterministic capability and schema checks, and a receipt-checked stub executor. PostgreSQL, Valkey, and the Docker executor remain future boundaries.
 
 ## Implemented Features
 
-Phase 0 foundation: shared Pydantic contracts, FastAPI health endpoint, replay-mode Compose services, OpenAPI export, five JSON Schema exports, six tests, and Python compilation checks.
+Phase 0 foundation: shared Pydantic contracts, FastAPI health endpoint, replay-mode Compose services, OpenAPI export, seven JSON Schema exports, and test tooling.
+
+Phase 1: Ed25519 token issuance/verification, agent registry, lifecycle/security-state checks, capability enforcement including declared tool capabilities, exact tool registry, basic object-schema validation, deterministic `Gateway.authorize()`, evaluate/execute endpoints, and a stub executor that accepts only one-time Gateway-issued ALLOW/WARN grants.
 
 ## Missing Features
 
 - Repository and Git baseline
 - Database-backed Python environment configuration
 - Full versioned contract set and security-kernel schemas
-- Gateway authorization API and health dependency checks
-- Gateway authorization pipeline
-- Identity, capability, tool, policy, validation, risk, decision, approval, breaker, audit, incident, and replay modules
+- PostgreSQL-backed authorization state and health dependency checks
+- Policy, risk, approval, breaker, audit, incident, replay, and advanced validation modules
 - SQLAlchemy models, Alembic migrations, PostgreSQL roles, and transactional outbox
 - Valkey event delivery and SSE backend
 - Scripted agents and orchestrator
@@ -37,28 +38,26 @@ Phase 0 foundation: shared Pydantic contracts, FastAPI health endpoint, replay-m
 
 ## Broken Features
 
-The health/API foundation is runnable, but no authorization or execution behavior exists to evaluate. The absence of an enforced Gateway is still the primary security gap.
+The Phase 1 Gateway is runnable, but persistence, duplicate-request handling, advanced parameter validation, and later containment controls are not implemented yet.
 
 ## Security Violations
 
 The following are currently unimplemented controls, not observed runtime bypasses:
 
-- No Gateway boundary exists.
-- No agent identity or token verification exists.
-- No registered-tool execution boundary exists.
-- No capability or task binding enforcement exists.
-- No deterministic parameter validation exists.
+- No PostgreSQL-backed Gateway state exists yet.
+- No request replay/idempotency persistence exists yet.
+- No advanced parameter validation exists yet.
 - No approval pause, idempotency, quarantine, or circuit breaker exists.
 - No append-only audit chain exists.
 - No evidence yet proves that agents cannot access credentials, filesystem, databases, HTTP, Docker, or tools directly.
 
 ## Test Coverage
 
-Seven Phase 0 tests pass. Ruff and mypy are configured but unavailable in the current environment; coverage measurement is deferred until the first security-kernel slice exists.
+Twenty-two Phase 1 tests pass, including identity, token claims, lifecycle state, capability metadata, exact tool resolution, schema validation, API execution, architecture guards, forged-receipt rejection, grant substitution rejection, and no-execution-after-block. Ruff and mypy are configured but unavailable in the current environment.
 
 ## P0 Status
 
-**Phase 0 foundation complete; Phase 1 not started.** The runnable foundation is replay-configured, but Gateway authorization is not implemented.
+**Phase 1 complete.** The deterministic Gateway spine is implemented and tested. Persistence and later security modules are intentionally deferred.
 
 ## P1 Status
 
@@ -72,9 +71,8 @@ Seven Phase 0 tests pass. Ruff and mypy are configured but unavailable in the cu
 
 Next implementation phase:
 
-1. Implement the Gateway pipeline and Ed25519 identity service.
-2. Add agent/capability/task/tool registries and exact tool resolution.
-3. Add a stub executor reachable only after authorization.
-4. Add negative authorization and no-execution-after-block tests.
+1. Add PostgreSQL models and migrations without changing the Gateway decision contract.
+2. Add the transactional outbox and Valkey delivery boundary.
+3. Preserve the Phase 1 in-memory tests as fast security-kernel tests.
 
-The first security-kernel slice after Phase 0 should be a fully testable `Gateway.authorize()` path for identity, status, task binding, capability, exact tool resolution, and a stub executor. No agent-facing code should be added before that boundary exists.
+No agent-facing code should bypass the Gateway. Phase 2 must not add persistence shortcuts or move decisions out of the deterministic Gateway.

@@ -25,6 +25,8 @@ class ExecutionState(StrEnum):
 
 
 class ReasonCode(StrEnum):
+    AGENT_DISABLED = "AGENT_DISABLED"
+    AGENT_QUARANTINED = "AGENT_QUARANTINED"
     CAPABILITY_DENIED = "CAPABILITY_DENIED"
     TOOL_UNREGISTERED = "TOOL_UNREGISTERED"
     SCHEMA_INVALID = "SCHEMA_INVALID"
@@ -80,6 +82,11 @@ class Reason(StrictModel):
 
 class Decision(StrictModel):
     decision: DecisionOutcome
+    agent_id: str = ""
+    tool_name: str = ""
+    task_id: str = ""
+    trace_id: str = ""
+    execution_id: str = ""
     reasons: tuple[Reason, ...] = ()
     risk: dict[str, Any] = Field(default_factory=dict)
     policy_results: dict[str, Any] = Field(default_factory=dict)

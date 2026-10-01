@@ -40,6 +40,8 @@
     },
     "ReasonCode": {
       "enum": [
+        "AGENT_DISABLED",
+        "AGENT_QUARANTINED",
         "CAPABILITY_DENIED",
         "TOOL_UNREGISTERED",
         "SCHEMA_INVALID",
@@ -63,6 +65,11 @@
   },
   "additionalProperties": false,
   "properties": {
+    "agent_id": {
+      "default": "",
+      "title": "Agent Id",
+      "type": "string"
+    },
     "capability_result": {
       "additionalProperties": true,
       "title": "Capability Result",
@@ -70,6 +77,11 @@
     },
     "decision": {
       "$ref": "#/$defs/DecisionOutcome"
+    },
+    "execution_id": {
+      "default": "",
+      "title": "Execution Id",
+      "type": "string"
     },
     "parameter_result": {
       "additionalProperties": true,
@@ -93,6 +105,21 @@
       "additionalProperties": true,
       "title": "Risk",
       "type": "object"
+    },
+    "task_id": {
+      "default": "",
+      "title": "Task Id",
+      "type": "string"
+    },
+    "tool_name": {
+      "default": "",
+      "title": "Tool Name",
+      "type": "string"
+    },
+    "trace_id": {
+      "default": "",
+      "title": "Trace Id",
+      "type": "string"
     }
   },
   "required": [

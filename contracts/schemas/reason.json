@@ -2,6 +2,8 @@
   "$defs": {
     "ReasonCode": {
       "enum": [
+        "AGENT_DISABLED",
+        "AGENT_QUARANTINED",
         "CAPABILITY_DENIED",
         "TOOL_UNREGISTERED",
         "SCHEMA_INVALID",

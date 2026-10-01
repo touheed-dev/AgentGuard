@@ -1,0 +1,99 @@
+{
+  "$defs": {
+    "AgentStatus": {
+      "enum": [
+        "active",
+        "paused",
+        "disabled",
+        "suspended",
+        "retired"
+      ],
+      "title": "AgentStatus",
+      "type": "string"
+    },
+    "SecurityState": {
+      "enum": [
+        "CLEAN",
+        "TRUSTED",
+        "SUSPECTED",
+        "COMPROMISED",
+        "QUARANTINED",
+        "RECOVERED"
+      ],
+      "title": "SecurityState",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "agent_id": {
+      "minLength": 1,
+      "title": "Agent Id",
+      "type": "string"
+    },
+    "allowed_tools": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Allowed Tools",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "capability_version": {
+      "minLength": 1,
+      "title": "Capability Version",
+      "type": "string"
+    },
+    "forbidden_tools": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Forbidden Tools",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "name": {
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "scopes": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Scopes",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "security_epoch": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Security Epoch",
+      "type": "integer"
+    },
+    "security_state": {
+      "$ref": "#/$defs/SecurityState",
+      "default": "CLEAN"
+    },
+    "status": {
+      "$ref": "#/$defs/AgentStatus",
+      "default": "active"
+    },
+    "task_id": {
+      "minLength": 1,
+      "title": "Task Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "agent_id",
+    "name",
+    "capability_version",
+    "task_id"
+  ],
+  "title": "Agent",
+  "type": "object"
+}
