@@ -1,0 +1,47 @@
+services:
+  gateway:
+    build: .
+    environment:
+      AGENTGUARD_ENV: replay
+      LLM_PROVIDER: replay
+      LLM_MODE: replay
+      DATABASE_URL: postgresql+asyncpg://agentguard:${POSTGRES_PASSWORD:-agentguard-dev-only}@postgres:5432/agentguard
+      VALKEY_URL: redis://valkey:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    networks:
+      - agentguard_internal
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: agentguard
+      # Development-only fallback; set POSTGRES_PASSWORD outside local demos.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agentguard-dev-only}
+      POSTGRES_DB: agentguard
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentguard -d agentguard"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agentguard_internal
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agentguard_internal
+
+networks:
+  agentguard_internal:
+    internal: true

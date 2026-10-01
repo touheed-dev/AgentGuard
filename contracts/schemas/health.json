@@ -1,0 +1,19 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "mode": {
+      "title": "Mode",
+      "type": "string"
+    },
+    "status": {
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "status",
+    "mode"
+  ],
+  "title": "HealthResponse",
+  "type": "object"
+}

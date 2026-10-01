@@ -1,0 +1,78 @@
+{
+  "$defs": {
+    "ExecutionState": {
+      "enum": [
+        "REQUESTED",
+        "AUTHORIZED",
+        "BLOCKED",
+        "APPROVAL_PENDING",
+        "APPROVED",
+        "EXECUTING",
+        "SUCCEEDED",
+        "FAILED",
+        "CANCELLED",
+        "UNKNOWN_RESULT"
+      ],
+      "title": "ExecutionState",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "agent_id": {
+      "minLength": 1,
+      "title": "Agent Id",
+      "type": "string"
+    },
+    "arguments": {
+      "additionalProperties": true,
+      "title": "Arguments",
+      "type": "object"
+    },
+    "execution_id": {
+      "minLength": 1,
+      "title": "Execution Id",
+      "type": "string"
+    },
+    "idempotency_key": {
+      "minLength": 1,
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "lifecycle_state": {
+      "$ref": "#/$defs/ExecutionState",
+      "default": "REQUESTED"
+    },
+    "request_id": {
+      "minLength": 1,
+      "title": "Request Id",
+      "type": "string"
+    },
+    "task_id": {
+      "minLength": 1,
+      "title": "Task Id",
+      "type": "string"
+    },
+    "tool_name": {
+      "minLength": 1,
+      "title": "Tool Name",
+      "type": "string"
+    },
+    "trace_id": {
+      "minLength": 1,
+      "title": "Trace Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "request_id",
+    "execution_id",
+    "agent_id",
+    "tool_name",
+    "task_id",
+    "trace_id",
+    "idempotency_key"
+  ],
+  "title": "ActionRequest",
+  "type": "object"
+}

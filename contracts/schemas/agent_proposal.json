@@ -1,0 +1,31 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "arguments": {
+      "additionalProperties": true,
+      "title": "Arguments",
+      "type": "object"
+    },
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "proposed_tool": {
+      "title": "Proposed Tool",
+      "type": "string"
+    },
+    "source": {
+      "title": "Source",
+      "type": "string"
+    }
+  },
+  "required": [
+    "proposed_tool",
+    "source",
+    "confidence"
+  ],
+  "title": "AgentProposal",
+  "type": "object"
+}

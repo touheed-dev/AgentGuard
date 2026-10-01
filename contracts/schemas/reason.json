@@ -1,0 +1,52 @@
+{
+  "$defs": {
+    "ReasonCode": {
+      "enum": [
+        "CAPABILITY_DENIED",
+        "TOOL_UNREGISTERED",
+        "SCHEMA_INVALID",
+        "PATH_TRAVERSAL",
+        "SENSITIVE_RESOURCE",
+        "DESTINATION_NOT_ALLOWLISTED",
+        "TASK_INCONSISTENT",
+        "COMM_PATH_DENIED",
+        "HONEY_ASSET_TOUCHED",
+        "CUMULATIVE_RISK_HIGH",
+        "BREAKER_TRIPPED",
+        "REQUEST_REPLAYED",
+        "TOKEN_INVALID",
+        "APPROVAL_STALE",
+        "EXECUTION_DUPLICATE",
+        "RESULT_UNKNOWN"
+      ],
+      "title": "ReasonCode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "$ref": "#/$defs/ReasonCode"
+    },
+    "message": {
+      "title": "Message",
+      "type": "string"
+    },
+    "severity": {
+      "title": "Severity",
+      "type": "string"
+    },
+    "source": {
+      "title": "Source",
+      "type": "string"
+    }
+  },
+  "required": [
+    "code",
+    "message",
+    "severity",
+    "source"
+  ],
+  "title": "Reason",
+  "type": "object"
+}
