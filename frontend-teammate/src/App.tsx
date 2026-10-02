@@ -385,15 +385,44 @@ export function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#DDD8CE] bg-[#EDE8DE]/80 py-3 px-6">
-        <div className="max-w-screen-2xl mx-auto flex flex-wrap items-center justify-between gap-3 text-[10px] font-mono text-slate-700">
-          <span>AgentGuard Runtime Security Gateway • Fail-Closed Invariant</span>
-          <div className="flex items-center gap-4">
+      <footer className="border-t border-[#D6CFC3] bg-[#EDE8DE] py-4 px-6 mt-auto">
+        <div className="max-w-screen-2xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 flex items-center justify-center">
+              <svg viewBox="0 0 120 120" className="w-5 h-5" fill="none">
+                <path d="M 60 12 L 22 28 L 22 65 C 22 88 60 108 60 108 Z" fill="#047857" />
+                <path d="M 60 12 L 98 28 L 98 65 C 98 88 60 108 60 108 Z" fill="#C5BBAE" />
+                <path d="M 60 33 L 86 75 L 73 75 L 60 52 L 47 75 L 34 75 Z" fill="#1E232A" />
+                <path d="M 60 65 Q 60 74 69 74 Q 60 74 60 83 Q 60 74 51 74 Q 60 74 60 65 Z" fill="#10B981" />
+              </svg>
+            </div>
+            <div>
+              <span className="font-bold text-sm" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                <span className="text-[#1E232A]">Agent</span>
+                <span className="text-[#047857]">Guard</span>
+              </span>
+              <span className="text-[10px] text-[#7A6F62] ml-2 tracking-wider uppercase font-semibold">
+                Secure AI Agents. Real-World Impact.
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-[10px] text-[#7A6F62] uppercase tracking-widest">
+            <span className="text-[#047857] font-bold">Security</span>
+            <span>•</span>
+            <span className="text-[#1E232A] font-bold">Control</span>
+            <span>•</span>
+            <span className="text-[#047857] font-bold">Observability</span>
+            <span>•</span>
+            <span className="text-[#1E232A] font-bold">Trust</span>
+          </div>
+
+          <div className="flex items-center gap-4 text-[10px] text-[#7A6F62]">
             <span>RFC-8785 SHA-256</span>
             <span>•</span>
-            <span>POST-BLOCK RATE: <span className="text-emerald-600">0.00%</span></span>
+            <span>POST-BLOCK RATE: <span className="text-[#047857] font-bold">0.00%</span></span>
             <span>•</span>
-            <span>PUBKEY: {stats?.gateway_public_key ?? 'ed25519:…'}</span>
+            <span>FAIL-CLOSED: <span className="text-[#047857] font-bold">ACTIVE</span></span>
           </div>
         </div>
       </footer>

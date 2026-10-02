@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Activity, Cpu, GitBranch, History, Radio, Lock, RotateCcw } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 interface NavbarProps {
   activeTab: 'command-center' | 'pipeline' | 'attack-lab' | 'checkpoints';
@@ -85,46 +86,8 @@ export const Navbar: React.FC<NavbarProps> = ({
       >
         <div className="max-w-screen-2xl mx-auto flex items-center justify-between gap-4">
 
-          {/* ── Brand ── */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div
-              className="relative w-9 h-9 rounded-xl flex items-center justify-center border"
-              style={{
-                background: 'linear-gradient(135deg, rgba(5,150,105,0.12), rgba(5,150,105,0.04))',
-                borderColor: 'rgba(5,150,105,0.35)',
-                boxShadow: '0 0 14px rgba(5,150,105,0.15)',
-              }}
-            >
-              <Shield className="w-5 h-5" style={{ color: '#059669' }} />
-              <div
-                className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full pulse-green"
-                style={{ background: '#34d399' }}
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="font-bold text-base tracking-tight"
-                  style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#1E232A' }}
-                >
-                  AgentGuard
-                </span>
-                <span
-                  className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border"
-                  style={{
-                    background: 'rgba(5,150,105,0.1)',
-                    color: '#047857',
-                    borderColor: 'rgba(5,150,105,0.3)',
-                  }}
-                >
-                  GATEWAY
-                </span>
-              </div>
-              <p className="text-[10px] font-mono" style={{ color: '#9A8F82' }}>
-                Runtime Security Gateway
-              </p>
-            </div>
-          </div>
+          {/* ── Official Brand Identity Lockup ── */}
+          <BrandLogo size={38} showWordmark={true} showBadge={true} badgeText="GATEWAY" />
 
           {/* ── Navigation Tabs — all beige tabs ── */}
           <nav
