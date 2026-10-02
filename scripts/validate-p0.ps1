@@ -214,26 +214,19 @@ try {
     Record-Result "Replay" "POST /replay (Deterministic Replay)" "FAIL" $_.Exception.Message
 }
 
-# Step 5: Frontend Build & Route Validation
-Write-Host "`n>>> 5. FRONTEND BUILD & ROUTE VALIDATION" -ForegroundColor Magenta
+# Step 5: Frontend Build & Typecheck Validation
+Write-Host "`n>>> 5. FRONTEND BUILD & VALIDATION" -ForegroundColor Magenta
 try {
-    Push-Location "Frontend"
+    Push-Location "frontend-teammate"
     $buildOutput = npm run build 2>&1 | Out-String
     Pop-Location
     if ($LASTEXITCODE -ne 0) {
         throw "Frontend build failed: $buildOutput"
     }
-    
-    $requiredRoutes = @("/", "/activity", "/graph", "/incidents", "/approvals", "/traces", "/attack-lab")
-    foreach ($r in $requiredRoutes) {
-        if ($buildOutput -match [regex]::Escape($r)) {
-            # Route found in build output
-        }
-    }
-    Record-Result "Frontend" "Next.js Static Build & P0 Routes" "PASS" "Compiled 10/10 static routes cleanly with TypeScript"
+    Record-Result "Frontend" "Vite & Strict TypeScript Production Build" "PASS" "Built cleanly with 0 TypeScript/Vite errors"
 } catch {
-    if (Get-Location | Select-String "Frontend") { Pop-Location }
-    Record-Result "Frontend" "Next.js Static Build & P0 Routes" "FAIL" $_.Exception.Message
+    if (Get-Location | Select-String "frontend-teammate") { Pop-Location }
+    Record-Result "Frontend" "Vite & Strict TypeScript Production Build" "FAIL" $_.Exception.Message
 }
 
 # Step 6: Full Backend Test Suite & Code Quality

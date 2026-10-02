@@ -54,3 +54,4 @@ postgres-data/
 valkey-data/
 artifacts/
 *.log
+local_archive/
