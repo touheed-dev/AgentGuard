@@ -15,3 +15,6 @@ class AgentRegistry:
         if agent.agent_id not in self._agents:
             raise KeyError(agent.agent_id)
         self.register(agent)
+
+    def list(self) -> tuple[Agent, ...]:
+        return tuple(self._agents.values())

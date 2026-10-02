@@ -35,3 +35,6 @@ class ToolRegistry:
 
     def names(self) -> frozenset[str]:
         return frozenset(self._tools)
+
+    def list(self) -> tuple[ToolDefinition, ...]:
+        return tuple(self._tools.values())

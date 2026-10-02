@@ -52,4 +52,5 @@ coverage/
 docker-data/
 postgres-data/
 valkey-data/
+artifacts/
 *.log
