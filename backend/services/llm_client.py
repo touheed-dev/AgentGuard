@@ -30,7 +30,7 @@ logger = logging.getLogger("agentguard.llm")
 class LLMRequest:
     prompt: str
     system_prompt: str = ""
-    model: str = "llama-3.3-70b-versatile"
+    model: str = ""
     temperature: float = 0.0
     max_tokens: int = 1024
     agent_id: str = "unknown"

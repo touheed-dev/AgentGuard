@@ -1,5 +1,6 @@
 import os
 from typing import Any
+from uuid import uuid4
 
 from fastapi import FastAPI
 from pydantic import Field
@@ -25,6 +26,15 @@ class AuditVerificationResponse(StrictModel):
     error: str | None = None
 
 
+class TokenIssueRequest(StrictModel):
+    agent_id: str
+    task_id: str = "task-1"
+    capability_version: str = "cap-v1"
+    scope: list[str] | None = None
+    security_epoch: int = 0
+    lifetime_seconds: int = 300
+
+
 app = FastAPI(
     title="AgentGuard Gateway",
     version="0.1.0",
@@ -42,6 +52,25 @@ trace_graph = TraceGraphService()
 @app.get("/health", response_model=HealthResponse, tags=["system"])
 async def health() -> HealthResponse:
     return HealthResponse(status="ok", mode=os.getenv("LLM_MODE", "replay"))
+
+
+@app.post("/tokens/issue", tags=["identity"])
+async def issue_token(req: TokenIssueRequest) -> dict[str, Any]:
+    agent = gateway.agents.get(req.agent_id)
+    if req.scope is not None:
+        scopes = frozenset(req.scope)
+    else:
+        scopes = agent.scopes if agent else frozenset()
+    token = identity_service.issue_token(
+        agent_id=req.agent_id,
+        task_id=req.task_id,
+        capability_version=req.capability_version,
+        scope=scopes,
+        security_epoch=req.security_epoch,
+        lifetime_seconds=req.lifetime_seconds,
+    )
+    return {"token": token, "agent_id": req.agent_id, "task_id": req.task_id}
+
 
 
 @app.post("/actions/evaluate", response_model=Decision, tags=["actions"])

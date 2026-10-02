@@ -94,13 +94,13 @@ $BaseUrl = "http://localhost:8000"
 # Health & OpenAPI
 try {
     $health = Invoke-RestMethod -Uri "$BaseUrl/health" -Method Get -TimeoutSec 5
-    if ($health.status -eq "ok" -and $health.mode -eq "replay") {
-        Record-Result "API" "GET /health (Replay Mode)" "PASS" "Status ok, mode replay"
+    if ($health.status -eq "ok" -and ($health.mode -eq "replay" -or $health.mode -eq "live")) {
+        Record-Result "API" "GET /health (Gateway Active)" "PASS" "Status ok, mode $($health.mode)"
     } else {
-        Record-Result "API" "GET /health (Replay Mode)" "FAIL" "Unexpected response: $(ConvertTo-Json $health -Compress)"
+        Record-Result "API" "GET /health (Gateway Active)" "FAIL" "Unexpected response: $(ConvertTo-Json $health -Compress)"
     }
 } catch {
-    Record-Result "API" "GET /health (Replay Mode)" "FAIL" $_.Exception.Message
+    Record-Result "API" "GET /health (Gateway Active)" "FAIL" $_.Exception.Message
 }
 
 try {

@@ -323,6 +323,54 @@
         "title": "ReasonCode",
         "type": "string"
       },
+      "TokenIssueRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "agent_id": {
+            "title": "Agent Id",
+            "type": "string"
+          },
+          "capability_version": {
+            "default": "cap-v1",
+            "title": "Capability Version",
+            "type": "string"
+          },
+          "lifetime_seconds": {
+            "default": 300,
+            "title": "Lifetime Seconds",
+            "type": "integer"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope"
+          },
+          "security_epoch": {
+            "default": 0,
+            "title": "Security Epoch",
+            "type": "integer"
+          },
+          "task_id": {
+            "default": "task-1",
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "title": "TokenIssueRequest",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -821,6 +869,49 @@
         "summary": "Replay Trace",
         "tags": [
           "replay"
+        ]
+      }
+    },
+    "/tokens/issue": {
+      "post": {
+        "operationId": "issue_token_tokens_issue_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenIssueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Issue Token Tokens Issue Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Issue Token",
+        "tags": [
+          "identity"
         ]
       }
     },

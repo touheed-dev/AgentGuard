@@ -112,19 +112,28 @@ def test_ollama_failure_and_fallback() -> None:
 
 
 def test_groq_model_configuration_precedence(monkeypatch: pytest.MonkeyPatch) -> None:
-    # 1. Fallback default
+    # 1. Fallback default when GROQ_MODEL absent
     monkeypatch.delenv("GROQ_MODEL", raising=False)
     p_default = GroqLLMProvider(api_key="gsk_test")
     assert p_default.default_model == "llama-3.3-70b-versatile"
+    req_empty = LLMRequest(prompt="Hello")
+    assert req_empty.model == ""
 
-    # 2. GROQ_MODEL environment variable
+    # 2. GROQ_MODEL environment variable used when request model is empty
     monkeypatch.setenv("GROQ_MODEL", "openai/gpt-oss-120b")
     p_env = GroqLLMProvider(api_key="gsk_test")
     assert p_env.default_model == "openai/gpt-oss-120b"
+    assert (req_empty.model or p_env.default_model) == "openai/gpt-oss-120b"
 
     # 3. Explicit constructor argument overrides environment variable
     p_explicit = GroqLLMProvider(api_key="gsk_test", default_model="custom/llama-3-custom")
     assert p_explicit.default_model == "custom/llama-3-custom"
+    assert (req_empty.model or p_explicit.default_model) == "custom/llama-3-custom"
+
+    # 4. Explicit request model overrides provider default model
+    req_explicit = LLMRequest(prompt="Hello", model="explicit/override-model")
+    assert (req_explicit.model or p_env.default_model) == "explicit/override-model"
+
 
 
 def test_groq_rate_limit_retry_and_backoff_success(monkeypatch: pytest.MonkeyPatch) -> None:

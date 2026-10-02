@@ -2,9 +2,11 @@ services:
   gateway:
     build: .
     environment:
-      AGENTGUARD_ENV: replay
-      LLM_PROVIDER: replay
-      LLM_MODE: replay
+      AGENTGUARD_ENV: ${AGENTGUARD_ENV:-replay}
+      LLM_PROVIDER: ${LLM_PROVIDER:-replay}
+      LLM_MODE: ${LLM_MODE:-replay}
+      GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-120b}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
       AGENTGUARD_PERSISTENCE: "true"
       DATABASE_URL: postgresql+asyncpg://agentguard:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/agentguard
       VALKEY_URL: redis://valkey:6379/0
