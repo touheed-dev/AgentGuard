@@ -16,6 +16,7 @@ services:
       valkey:
         condition: service_healthy
     networks:
+      - default
       - agentguard_internal
 
   postgres:
