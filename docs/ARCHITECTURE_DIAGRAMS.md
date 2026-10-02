@@ -6,6 +6,8 @@ This document illustrates the structural boundaries, stage-gate authorization fl
 
 ## 1. End-to-End System Architecture
 
+![AgentGuard System Architecture](images/architecture_schematic.png)
+
 ```mermaid
 graph TD
     subgraph Agent Runtime ["Autonomous Agent Mesh (Untrusted)"]
@@ -59,6 +61,8 @@ graph TD
 ---
 
 ## 2. Gateway Security Enforcement Pipeline
+
+![AgentGuard Stage-Gate Pipeline](images/gateway_pipeline_flow.png)
 
 Every proposed tool call traverses a strict, sequential fail-closed pipeline:
 
@@ -130,6 +134,8 @@ Every proposed tool call traverses a strict, sequential fail-closed pipeline:
 
 ## 3. Active Deception & Containment Model
 
+![AgentGuard Active Deception & Quarantine](images/deception_quarantine_workflow.png)
+
 When an agent interacts with synthetic canary data:
 
 ```mermaid
@@ -163,6 +169,8 @@ sequenceDiagram
 ---
 
 ## 4. Cryptographic Audit & Replay Subsystem
+
+![AgentGuard Cryptographic Merkle Audit & Replay](images/merkle_audit_replay_schematic.png)
 
 ```mermaid
 flowchart LR
