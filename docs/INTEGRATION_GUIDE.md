@@ -231,7 +231,7 @@ approved_result = guard.execute(
 
 When an action is blocked:
 - **Zero tool execution occurs.** The tool handler is never called.
-- The incident is cryptographically recorded in the Merkle audit tree.
+- The incident is cryptographically recorded in the hash-chained audit log.
 - The agent receives a `BlockedActionError` containing specific `reason_codes`.
 
 ```python
@@ -257,12 +257,11 @@ If an agent touches a configured Honeyasset (such as `/keys/honey_token.key` or 
 
 ## 12. Retrieving Traces & Audit
 
-Every action is given a unique trace ID and logged to the cryptographic Merkle audit log:
+Every action is given a unique trace ID and logged to the tamper-evident, cryptographically hash-chained audit log:
 
 ```python
 trace = guard.get_trace(trace_id="trace-research-101")
 print(trace.steps)             # Full sequence of policy evaluations & execution records
-print(trace.merkle_root)       # Cryptographic proof of non-tampering
 ```
 
 ---
@@ -320,7 +319,7 @@ docker compose up -d
 - **Fail-Closed**: If the Gateway is unreachable, actions fail closed and cannot execute.
 - **Single-Use Execution Grants**: Pre-execution security receipts cannot be replayed or modified.
 - **Non-Bypassable Honeyassets**: Accessing deception tripwires causes instantaneous quarantine.
-- **Cryptographic Auditability**: Tamper-evident Merkle tree logs all security decisions.
+- **Cryptographic Auditability**: Tamper-evident, cryptographically hash-chained audit log for all security decisions.
 
 ### What AgentGuard Does NOT Guarantee
 - Does not modify or filter thoughts inside third-party closed-source LLM weights.
