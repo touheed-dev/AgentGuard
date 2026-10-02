@@ -1,8 +1,12 @@
-# 🛡️ AgentGuard — Zero-Trust Runtime Security Gateway for Autonomous AI Agents
+<div align="center">
 
-> **Secure AI Agents. Real-World Impact.**
->
-> A zero-trust runtime security gateway, deterministic policy engine, and automated containment platform that intercepts every autonomous AI agent action proposal before execution — enforcing fail-closed invariants, parameter sanitization, active deception tripwires, dual-token human approval, hardened container isolation, and cryptographically verifiable Merkle audit trails.
+<img src="docs/images/agentguard_banner.png" alt="AgentGuard — Secure AI Agents. Real-World Impact." width="580" />
+
+<br />
+
+### Zero-Trust Runtime Security Gateway for Autonomous AI Agents
+
+> **Intercepts, authorizes, and controls every AI agent action before execution with deterministic CEL policies, active deception tripwires, dual-token human approval, hardened container isolation, and cryptographically verifiable Merkle audit trails.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Backend Tests: 93/93 Passed](https://img.shields.io/badge/Backend%20Tests-93%2F93%20Passed-047857.svg)](https://github.com/touheed-dev/AgentGuard)
@@ -10,7 +14,18 @@
 [![Post-Block Rate: 0.00%](https://img.shields.io/badge/Post--Block%20Exec%20Rate-0.00%25%20Fail--Closed-047857.svg)](https://github.com/touheed-dev/AgentGuard)
 [![Vite Build: Clean](https://img.shields.io/badge/Frontend%20Build-Clean%20%28520ms%29-047857.svg)](https://github.com/touheed-dev/AgentGuard)
 
-[Overview](#-overview) • [Key Features](#-key-features) • [Brand Identity & Design System](#-brand-identity--design-system) • [20-Stage Security Pipeline](#-20-stage-security-pipeline) • [System Architecture](#-system-architecture) • [Tech Stack](#-tech-stack) • [Directory Structure](#-project-directory-structure) • [API Specification](#-api-specification--rest-contracts) • [Attack Lab](#-attack-lab--threat-scenarios) • [Quick Start](#-quick-start) • [Judge Defense & Viva Guide](#-judge-defense--viva-guide) • [Verification Suite](#-verification-suite--code-quality) • [License](#-license)
+<p align="center">
+  <b><a href="#-overview">Overview</a></b> •
+  <b><a href="#-key-features">Key Features</a></b> •
+  <b><a href="#-brand-identity--design-system">Brand Identity</a></b> •
+  <b><a href="#-20-stage-security-pipeline">20-Stage Pipeline</a></b> •
+  <b><a href="#-system-architecture--visual-schematics">Architecture</a></b> •
+  <b><a href="#-tech-stack">Tech Stack</a></b> •
+  <b><a href="#-quick-start">Quick Start</a></b> •
+  <b><a href="#-judge-defense--viva-guide">Judge Defense</a></b>
+</p>
+
+</div>
 
 ---
 
@@ -122,7 +137,10 @@ Every intercepted agent action proposal evaluates to exactly one immutable verdi
 
 AgentGuard features a bespoke **Warm Tactical Cyber** design identity — balancing Swiss minimalism, editorial typography, and high-contrast security command center aesthetics:
 
-![Brand Identity System](docs/images/brand_identity_system.png)
+<div align="center">
+  <img src="docs/images/agentguard_shield.png" alt="AgentGuard Shield Emblem" width="160" />
+  <p><sub><b>The AgentGuard Security Shield with Central Agent 'A' Chevron & Intelligence Spark Star</b></sub></p>
+</div>
 
 ### 🏷️ Design Concept & Philosophy
 * **The Shield Emblem**: Hexagonal dual-facet shield representing security.
