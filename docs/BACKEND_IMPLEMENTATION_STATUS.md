@@ -51,7 +51,7 @@ Modular monolith architecture:
 - **Test Suite**: `python -m pytest backend/tests -v`
 - **Contracts Export**: `python scripts/export_openapi.py` (0 errors)
 - **Compilation**: `python -m compileall -q backend scripts` (0 errors)
-- **Frontend Build**: `npm run build` in `frontend/` (10/10 routes compiled)
+- **Frontend Build**: `npm run build` in `Frontend/` (10/10 routes compiled)
 
 ---
 

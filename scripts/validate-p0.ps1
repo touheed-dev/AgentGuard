@@ -217,7 +217,7 @@ try {
 # Step 5: Frontend Build & Route Validation
 Write-Host "`n>>> 5. FRONTEND BUILD & ROUTE VALIDATION" -ForegroundColor Magenta
 try {
-    Push-Location "frontend"
+    Push-Location "Frontend"
     $buildOutput = npm run build 2>&1 | Out-String
     Pop-Location
     if ($LASTEXITCODE -ne 0) {
@@ -232,7 +232,7 @@ try {
     }
     Record-Result "Frontend" "Next.js Static Build & P0 Routes" "PASS" "Compiled 10/10 static routes cleanly with TypeScript"
 } catch {
-    if (Get-Location | Select-String "frontend") { Pop-Location }
+    if (Get-Location | Select-String "Frontend") { Pop-Location }
     Record-Result "Frontend" "Next.js Static Build & P0 Routes" "FAIL" $_.Exception.Message
 }
 

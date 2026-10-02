@@ -50,7 +50,7 @@
   - Daily token budgeting and SHA-256 response caching.
   - Strict key isolation (keys never exposed to agents or frontend).
 
-### 3. Frontend Dashboard (`frontend/`)
+### 3. Frontend Dashboard (`Frontend/`)
 Built with Next.js 16 (App Router), TypeScript, Tailwind CSS, Lucide icons:
 - **Command Center (`/`)**: Active posture cards, agent state summary, breaker status, quick actions.
 - **Live Activity (`/activity`)**: Dynamic real-time action log with tool names, execution IDs, and status badges.
@@ -84,7 +84,7 @@ Breakdown:
 
 Compilation: `python -m compileall -q backend scripts` -> Passed (0 errors)
 Contracts: `python scripts/export_openapi.py` -> Passed (Clean schema export)
-Frontend Build: `npm run build` in `frontend/` -> Passed (10/10 static routes compiled cleanly)
+Frontend Build: `npm run build` in `Frontend/` -> Passed (10/10 static routes compiled cleanly)
 
 ---
 

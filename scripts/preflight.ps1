@@ -25,7 +25,7 @@ try {
             throw "Missing required repository file: $file"
         }
     }
-    $requiredDirs = @("backend", "frontend", "backend/tests", "docs")
+    $requiredDirs = @("backend", "Frontend", "backend/tests", "docs")
     foreach ($dir in $requiredDirs) {
         if (-not (Test-Path $dir)) {
             throw "Missing required directory: $dir"

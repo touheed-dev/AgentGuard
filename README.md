@@ -91,7 +91,7 @@ API documentation will be available at: `http://localhost:8000/docs`
 ### 3. Frontend Startup
 
 ```bash
-cd frontend
+cd Frontend
 npm install
 npm run dev
 ```
@@ -118,7 +118,7 @@ python -m compileall -q backend scripts
 python scripts/export_openapi.py
 
 # Frontend build & typecheck
-cd frontend
+cd Frontend
 npm run build
 ```
 
