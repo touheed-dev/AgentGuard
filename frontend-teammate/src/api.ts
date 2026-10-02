@@ -995,4 +995,16 @@ export const api = {
       trace_id: `TRC-${Date.now().toString().slice(-6)}`,
     });
   },
+
+  /**
+   * Reset Demo Environment: restores gateway, agents, breaker, and trace graph to pristine initial state.
+   */
+  async resetDemo(): Promise<{ status: string; message: string; agents: number; tools: number }> {
+    const res = await fetch(`${API_BASE}/demo/reset`, { method: 'POST' });
+    if (!res.ok) {
+      throw new Error(`Demo reset failed with HTTP ${res.status}`);
+    }
+    return res.json();
+  },
 };
+

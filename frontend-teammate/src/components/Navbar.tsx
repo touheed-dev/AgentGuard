@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Activity, Cpu, GitBranch, History, Radio, Lock } from 'lucide-react';
+import { Shield, Activity, Cpu, GitBranch, History, Radio, Lock, RotateCcw } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: 'command-center' | 'pipeline' | 'attack-lab' | 'checkpoints';
@@ -8,6 +8,8 @@ interface NavbarProps {
   ledgerHeight: number;
   isTrafficGenerating?: boolean;
   onToggleTraffic?: () => void;
+  onResetDemo?: () => void;
+  isResetting?: boolean;
 }
 
 const TABS = [
@@ -24,6 +26,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   ledgerHeight,
   isTrafficGenerating = false,
   onToggleTraffic,
+  onResetDemo,
+  isResetting = false,
 }) => {
   const [time, setTime] = useState(new Date());
 
@@ -212,6 +216,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                   style={{ color: isTrafficGenerating ? '#B45309' : '#9A8F82' }}
                 />
                 {isTrafficGenerating ? 'LIVE TRAFFIC' : 'SIM TRAFFIC'}
+              </button>
+            )}
+
+            {/* Reset Demo Button */}
+            {onResetDemo && (
+              <button
+                onClick={onResetDemo}
+                disabled={isResetting}
+                title="Reset Gateway, agents, circuit breakers, and trace graph to clean factory state"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium border transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50"
+                style={{
+                  background: '#EDE8DE',
+                  borderColor: '#D6CFC3',
+                  color: '#7A6F62',
+                }}
+              >
+                <RotateCcw
+                  className={`w-3.5 h-3.5 ${isResetting ? 'animate-spin' : ''}`}
+                  style={{ color: '#059669' }}
+                />
+                {isResetting ? 'RESETTING...' : 'RESET DEMO'}
               </button>
             )}
 

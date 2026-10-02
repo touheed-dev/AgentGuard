@@ -277,6 +277,21 @@ export function App() {
     } finally { setIsRunningMilestones(false); }
   };
 
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleResetDemo = async () => {
+    setIsResetting(true);
+    try {
+      await api.resetDemo();
+      await loadAllData();
+      showToast('DEMO RESET COMPLETE', 'Gateway, agents, circuit breakers, and trace graph restored to pristine state.', 'success');
+    } catch (err) {
+      showToast('DEMO RESET ERROR', err instanceof Error ? err.message : 'Failed to reset demo state', 'alert');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   const handleToggleTraffic = () => {
     setIsTrafficGenerating((prev) => !prev);
     if (!isTrafficGenerating) {
@@ -310,6 +325,8 @@ export function App() {
         ledgerHeight={stats?.ledger_height ?? 0}
         isTrafficGenerating={isTrafficGenerating}
         onToggleTraffic={handleToggleTraffic}
+        onResetDemo={handleResetDemo}
+        isResetting={isResetting}
       />
 
       {/* Main */}

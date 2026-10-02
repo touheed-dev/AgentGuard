@@ -24,11 +24,15 @@ def run_demo_verification() -> bool:
 
     client = httpx.Client(base_url=GATEWAY_URL, timeout=10.0)
 
-    # 1. Health Check
+    # 1. Health Check & Demo State Reset
     health_res = client.get("/health")
     assert health_res.status_code == 200, f"Health check failed: {health_res.text}"
     health = health_res.json()
     print(f"[1] Gateway Health: {health['status']} (mode={health['mode']})")
+
+    reset_res = client.post("/demo/reset")
+    assert reset_res.status_code == 200, f"Demo reset failed: {reset_res.text}"
+    print(f"[2] Demo State Reset: Pristine Initial State Restored (agents={reset_res.json().get('agents', 4)})")
 
     # 2. Step 1: Normal Agent ALLOW
     print("\n--- DEMO STEP 1: Normal Authorized Agent Action ---")

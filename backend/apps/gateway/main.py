@@ -373,3 +373,18 @@ async def run_attack_scenario(scenario_id: str) -> dict[str, Any]:
         "agent_status": res.agent_status.value,
         "executed": res.executed,
     }
+
+
+@app.post("/demo/reset", tags=["system"])
+@app.post("/system/reset", tags=["system"])
+async def reset_demo_state() -> dict[str, Any]:
+    global gateway, identity_service, executor, trace_graph
+    gateway, identity_service, executor = create_runtime()
+    trace_graph = TraceGraphService()
+    return {
+        "status": "ok",
+        "message": "Demo environment reset to pristine initial state.",
+        "agents": len(gateway.agents.list()),
+        "tools": len(gateway.tools.list()),
+    }
+
