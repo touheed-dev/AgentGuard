@@ -107,6 +107,18 @@
         "title": "DecisionOutcome",
         "type": "string"
       },
+      "DemoActRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "task_id": {
+            "default": "task-1",
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "title": "DemoActRequest",
+        "type": "object"
+      },
       "ExecutionResponse": {
         "additionalProperties": false,
         "properties": {
@@ -322,6 +334,33 @@
         ],
         "title": "ReasonCode",
         "type": "string"
+      },
+      "ResearchTaskRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "agent_id": {
+            "default": "researcher-01",
+            "title": "Agent Id",
+            "type": "string"
+          },
+          "max_steps": {
+            "default": 6,
+            "title": "Max Steps",
+            "type": "integer"
+          },
+          "task": {
+            "default": "Research the AgentGuard security framework.",
+            "title": "Task",
+            "type": "string"
+          },
+          "task_id": {
+            "default": "task-1",
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "title": "ResearchTaskRequest",
+        "type": "object"
       },
       "TokenIssueRequest": {
         "additionalProperties": false,
@@ -540,6 +579,50 @@
         ]
       }
     },
+    "/agent/researcher/run": {
+      "post": {
+        "description": "Run the real Researcher Agent on a given task.\n\nThe agent uses the LLM to propose actions, sends each through the\nAgentGuard SDK \u2192 Gateway \u2192 Executor pipeline, and returns the\nfull trace of steps with their security decisions.",
+        "operationId": "run_researcher_agent_agent_researcher_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResearchTaskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Researcher Agent Agent Researcher Run Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Researcher Agent",
+        "tags": [
+          "agents"
+        ]
+      }
+    },
     "/agents": {
       "get": {
         "operationId": "list_agents_agents_get",
@@ -754,6 +837,166 @@
         "summary": "Verify Audit",
         "tags": [
           "audit"
+        ]
+      }
+    },
+    "/demo/act1/legitimate": {
+      "post": {
+        "description": "ACT 1: Researcher agent reads a legitimate document \u2014 ALLOW.",
+        "operationId": "demo_act1_legitimate_demo_act1_legitimate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoActRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Demo Act1 Legitimate Demo Act1 Legitimate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Demo Act1 Legitimate",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/act2/prompt-injection": {
+      "post": {
+        "description": "ACT 2: Malicious document triggers prompt injection \u2192 AgentGuard BLOCKS.",
+        "operationId": "demo_act2_prompt_injection_demo_act2_prompt_injection_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoActRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Demo Act2 Prompt Injection Demo Act2 Prompt Injection Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Demo Act2 Prompt Injection",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/act3/approval": {
+      "post": {
+        "description": "ACT 3: High-risk db_query \u2192 REQUIRE_APPROVAL.",
+        "operationId": "demo_act3_approval_demo_act3_approval_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Demo Act3 Approval Demo Act3 Approval Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Demo Act3 Approval",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/act4/honeytoken": {
+      "post": {
+        "description": "ACT 4: Agent accesses honeytoken \u2192 BLOCK + QUARANTINE.",
+        "operationId": "demo_act4_honeytoken_demo_act4_honeytoken_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Demo Act4 Honeytoken Demo Act4 Honeytoken Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Demo Act4 Honeytoken",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/act5/investigation": {
+      "post": {
+        "description": "ACT 5: Investigation \u2014 list incidents and traces for review.",
+        "operationId": "demo_act5_investigation_demo_act5_investigation_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Demo Act5 Investigation Demo Act5 Investigation Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Demo Act5 Investigation",
+        "tags": [
+          "demo"
         ]
       }
     },
