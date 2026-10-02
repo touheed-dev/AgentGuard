@@ -531,7 +531,7 @@ export const api = {
           prev_hash: '0000000000000000000000000000000000000000000000000000000000000000',
           merkle_root: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
           state_hash: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
-          canonical_payload: '{"genesis": true, "kernel": "AgentGuard v2.4.1"}',
+          canonical_payload: '{"genesis": true, "kernel": "AgentGuard"}',
           event_type: 'GATEWAY_GENESIS',
           agent_id: 'gateway-core',
           tool_name: 'kernel_init',

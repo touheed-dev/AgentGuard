@@ -1,6 +1,6 @@
 """Hardened Docker Execution Boundary configuration and executor implementation.
 
-Enforces ADR-007 and PRD v2.4.1 sandbox constraints:
+Enforces ADR-007 and runtime sandbox constraints:
 - read_only root filesystem
 - network_disabled (network_mode="none")
 - non-root user (10001:10001)

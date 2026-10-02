@@ -39,7 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     'CEL ENGINE: DETERMINISTIC',
     'FAIL-CLOSED INVARIANT: ACTIVE',
     'Ed25519 TOKEN FRESHNESS: OK',
-    'STAGE-GATE KERNEL: v2.4.1',
+    'GATEWAY KERNEL: ACTIVE',
     '20-STAGE PIPELINE: ARMED',
   ];
 
@@ -113,7 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     borderColor: 'rgba(5,150,105,0.3)',
                   }}
                 >
-                  v2.4.1
+                  GATEWAY
                 </span>
               </div>
               <p className="text-[10px] font-mono" style={{ color: '#9A8F82' }}>

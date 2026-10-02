@@ -1,7 +1,7 @@
 # AgentGuard Backend Implementation Status
 
 **Baseline:** 2026-10-02  
-**Source of truth:** `AgentGuard — PRD v2.4.1 (Architecture Lock).md`  
+**Source of truth:** AgentGuard Architecture Specification  
 **Scope:** Complete P0 Backend, Security/Control Plane, and Frontend Integration
 
 ## Audit Summary

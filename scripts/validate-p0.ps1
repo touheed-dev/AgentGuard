@@ -48,7 +48,7 @@ function Record-Result {
 
 Write-Host "==================================================" -ForegroundColor Cyan
 Write-Host " AGENTGUARD P0 AUTOMATED VALIDATION HARNESS" -ForegroundColor Cyan
-Write-Host " Source of Truth: AgentGuard PRD v2.4.1" -ForegroundColor Cyan
+Write-Host " Source of Truth: AgentGuard Architecture Specification" -ForegroundColor Cyan
 Write-Host " Baseline: Replay Mode / Strict Fail-Closed" -ForegroundColor Cyan
 Write-Host "==================================================" -ForegroundColor Cyan
 
@@ -301,7 +301,7 @@ if (-not (Test-Path "artifacts")) {
 
 $summaryObj = [PSCustomObject]@{
     Timestamp = (Get-Date).ToString("o")
-    SourceOfTruth = "AgentGuard PRD v2.4.1"
+    SourceOfTruth = "AgentGuard Architecture Specification"
     Baseline = "Replay Mode"
     Summary = [PSCustomObject]@{
         Pass = $PassCount
@@ -321,7 +321,7 @@ $reportText = @"
 ==================================================
 Timestamp: $((Get-Date).ToString("yyyy-MM-dd HH:mm:ss"))
 Mode: Replay (Deterministic)
-PRD: v2.4.1 Architecture Lock
+Specification: Architecture Lock
 
 Summary of Checks:
 "@

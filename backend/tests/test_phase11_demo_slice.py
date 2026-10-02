@@ -1,6 +1,6 @@
 """Phase 11: End-to-end 22-step vertical slice demonstration test.
 
-Executes the complete PRD vertical slice flow through the Gateway:
+Executes the complete AgentGuard vertical slice flow through the Gateway:
 1. Start AgentGuard runtime
 2. Register Planner, Researcher, Coder, Executor agents
 3. Task begins (task-1)

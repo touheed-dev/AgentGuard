@@ -1,6 +1,6 @@
 # AgentGuard Backend Engineering Plan
 
-This plan implements PRD v2.4.1 without changing its locked architecture. The backend is a modular monolith: the Gateway owns the authorization pipeline and invokes typed in-process services. The executor is the only separate execution boundary.
+This plan implements the AgentGuard system specification. The backend is a modular monolith: the Gateway owns the authorization pipeline and invokes typed in-process services. The executor is the only separate execution boundary.
 
 ## Delivery Rules
 

@@ -1,6 +1,6 @@
 """LLM Client abstraction supporting Groq live provider, Ollama local provider, and deterministic Replay.
 
-Conforms to PRD LLM Architecture:
+Conforms to AgentGuard LLM Architecture:
 - Provider abstraction (Groq, Ollama, Replay)
 - Model registry
 - Rate limiting / backoff support

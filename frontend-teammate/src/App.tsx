@@ -370,7 +370,7 @@ export function App() {
       {/* Footer */}
       <footer className="border-t border-[#DDD8CE] bg-[#EDE8DE]/80 py-3 px-6">
         <div className="max-w-screen-2xl mx-auto flex flex-wrap items-center justify-between gap-3 text-[10px] font-mono text-slate-700">
-          <span>AgentGuard Runtime Security Gateway • Architecture Lock v2.4.1 • Fail-Closed Invariant</span>
+          <span>AgentGuard Runtime Security Gateway • Fail-Closed Invariant</span>
           <div className="flex items-center gap-4">
             <span>RFC-8785 SHA-256</span>
             <span>•</span>

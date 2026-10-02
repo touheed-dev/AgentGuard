@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted by PRD v2.4.1; implementation pending.
+Accepted; implemented.
 
 ## Decision
 
