@@ -757,6 +757,29 @@
         ]
       }
     },
+    "/demo/reset": {
+      "post": {
+        "operationId": "reset_demo_state_demo_reset_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reset Demo State Demo Reset Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Reset Demo State",
+        "tags": [
+          "system"
+        ]
+      }
+    },
     "/graph": {
       "get": {
         "operationId": "get_graph_graph_get",
@@ -869,6 +892,29 @@
         "summary": "Replay Trace",
         "tags": [
           "replay"
+        ]
+      }
+    },
+    "/system/reset": {
+      "post": {
+        "operationId": "reset_demo_state_system_reset_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reset Demo State System Reset Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Reset Demo State",
+        "tags": [
+          "system"
         ]
       }
     },
