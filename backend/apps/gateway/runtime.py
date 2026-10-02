@@ -63,8 +63,8 @@ def _build_tool_registry() -> ToolRegistry:
                     "properties": {"path": {"type": "string"}},
                     "additionalProperties": False,
                 },
-                sensitivity=15,
-                data_sensitivity=15,
+                sensitivity=10,
+                data_sensitivity=10,
             ),
             ToolDefinition(
                 tool_name="http_fetch",
@@ -234,14 +234,19 @@ def _build_honey_registry() -> HoneyAssetRegistry:
 # Main factory
 # ---------------------------------------------------------------------------
 
-def create_runtime() -> tuple[Gateway, IdentityService, RealExecutor]:
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+_RUNTIME_DEFAULT_KEY = Ed25519PrivateKey.generate()
+
+
+def create_runtime(private_key: Ed25519PrivateKey | None = None) -> tuple[Gateway, IdentityService, RealExecutor]:
     """Create a fully configured AgentGuard runtime.
 
     Returns
     -------
     tuple[Gateway, IdentityService, RealExecutor]
     """
-    identity = IdentityService()
+    identity = IdentityService(private_key=private_key or _RUNTIME_DEFAULT_KEY)
     agents = _build_agent_registry()
     tools = _build_tool_registry()
     executor_issuer = object()

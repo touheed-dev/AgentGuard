@@ -1,0 +1,15 @@
+AgentGuard Technologies Inc. - Company Profile
+==============================================
+Classification: PUBLIC / OVERVIEW
+
+MISSION:
+To provide deterministic, zero-trust runtime protection for autonomous AI agents
+interacting with production tools, APIs, files, and databases.
+
+CORE CAPABILITIES:
+- 20-Stage Gateway Enforcement Pipeline
+- Deterministic CEL Policy Engine
+- Dynamic Risk & Behavioral Modeling
+- Canary & Honeypot Deception Traps
+- Single-Use Execution Receipts
+- Cryptographically Hash-Chained Audit Log

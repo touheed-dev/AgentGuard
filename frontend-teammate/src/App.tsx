@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Navbar } from './components/Navbar';
 import { KpiTiles } from './components/KpiTiles';
 import { CommandCenterView } from './components/CommandCenterView';
+import { DemoWorkspaceView } from './components/DemoWorkspaceView';
 import { PipelineDeepDiveView } from './components/PipelineDeepDiveView';
 import { AttackLabView } from './components/AttackLabView';
 import { CheckpointsView } from './components/CheckpointsView';
@@ -46,8 +47,8 @@ function Toast({ title, message, type, onClose }: {
 }
 
 export function App() {
-  type Tab = 'command-center' | 'pipeline' | 'attack-lab' | 'checkpoints';
-  const [activeTab, setActiveTab] = useState<Tab>('command-center');
+  type Tab = 'demo-env' | 'command-center' | 'pipeline' | 'attack-lab' | 'checkpoints';
+  const [activeTab, setActiveTab] = useState<Tab>('demo-env');
   const [stats, setStats] = useState<GatewayStats | null>(null);
   const [interceptions, setInterceptions] = useState<InterceptionDecision[]>([]);
   const [agents, setAgents] = useState<AgentRecord[]>([]);
@@ -340,6 +341,12 @@ export function App() {
         />
 
         <div key={activeTab} className="tab-enter">
+          {activeTab === 'demo-env' && (
+            <DemoWorkspaceView
+              onRefreshAll={loadAllData}
+              onNavigateToTrace={() => setActiveTab('pipeline')}
+            />
+          )}
           {activeTab === 'command-center' && (
             <CommandCenterView
               interceptions={interceptions}

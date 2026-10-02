@@ -1,0 +1,12 @@
+AI Security Gateway Market Dynamics - 2026
+=========================================
+Classification: PUBLIC / RESEARCH
+
+MARKET OVERVIEW:
+The AI agent security market is projected to reach $4.2B by 2028.
+Enterprises increasingly require deterministic, fail-closed runtime control
+over multi-agent ecosystems, tool registries, and execution sandboxes.
+
+COMPETITIVE ADVANTAGE:
+AgentGuard provides zero-overhead cryptographic hash chaining, sub-millisecond CEL
+policy evaluation, multi-factor risk scoring, and deception canaries.

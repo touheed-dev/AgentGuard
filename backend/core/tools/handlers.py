@@ -227,7 +227,10 @@ def _handle_db_query(arguments: dict[str, Any]) -> dict[str, Any]:
 
     # Simulate a read-only in-memory result
     demo_tables = {
-        "users": [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}],
+        "users": [{"id": 1, "name": "Alice", "role": "analyst"}, {"id": 2, "name": "Bob", "role": "researcher"}],
+        "customers": [{"id": 101, "name": "Acme Corp", "tier": "Enterprise"}, {"id": 102, "name": "Globex Inc", "tier": "Growth"}],
+        "transactions": [{"id": "tx_901", "amount": 45000, "status": "settled"}, {"id": "tx_902", "amount": 12500, "status": "pending"}],
+        "research_records": [{"id": "rr_01", "topic": "AI Gateway Security", "status": "approved"}, {"id": "rr_02", "topic": "Runtime Policy CEL", "status": "published"}],
         "reports": [{"id": 1, "title": "Q3 Analysis", "status": "published"}],
         "configs": [{"key": "max_retries", "value": "3"}],
     }

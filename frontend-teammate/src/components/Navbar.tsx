@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Activity, Cpu, GitBranch, History, Radio, Lock, RotateCcw } from 'lucide-react';
+import { Shield, Activity, Cpu, GitBranch, History, Radio, Lock, RotateCcw, Layers } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 
 interface NavbarProps {
-  activeTab: 'command-center' | 'pipeline' | 'attack-lab' | 'checkpoints';
-  setActiveTab: (tab: 'command-center' | 'pipeline' | 'attack-lab' | 'checkpoints') => void;
+  activeTab: 'demo-env' | 'command-center' | 'pipeline' | 'attack-lab' | 'checkpoints';
+  setActiveTab: (tab: 'demo-env' | 'command-center' | 'pipeline' | 'attack-lab' | 'checkpoints') => void;
   isConnected: boolean;
   ledgerHeight: number;
   isTrafficGenerating?: boolean;
@@ -14,7 +14,8 @@ interface NavbarProps {
 }
 
 const TABS = [
-  { id: 'command-center' as const, label: 'Command Center', icon: Activity },
+  { id: 'demo-env'       as const, label: 'Agent Workspace', icon: Layers },
+  { id: 'command-center' as const, label: 'Command Center',  icon: Activity },
   { id: 'pipeline'       as const, label: '20-Stage Pipeline', icon: Cpu },
   { id: 'attack-lab'     as const, label: 'Attack Lab',      icon: GitBranch },
   { id: 'checkpoints'    as const, label: 'Checkpoints',     icon: History },
