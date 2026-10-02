@@ -79,7 +79,7 @@
 > "Look at the Gateway interception:
 > - Parameter security inspection immediately detected `PATH_TRAVERSAL` and `SENSITIVE_RESOURCE`.
 > - The Gateway short-circuits the pipeline with a **BLOCK** decision.
-> - **Crucial invariant:** The sandbox was never invoked. Post-block execution is **strictly 0.00%**. No data was read, and an alert is recorded in the Incident Center."
+> - **Crucial invariant:** The sandbox was never invoked. Post-block execution is measured at **0.00%** across tested attack scenarios. No data was read, and an alert is recorded in the Incident Center."
 
 ---
 
@@ -107,12 +107,13 @@
 ### Act 4: Cryptographic Audit Ledger & Deterministic Replay (3:30 – 4:15)
 
 **Speaker Narration:**
-> "For enterprise compliance and forensic investigations, every single Gateway decision is hashed using RFC-8785 JSON Canonicalization and chained into an immutable SHA-256 Merkle ledger."
+> "For enterprise compliance and forensic investigations, every single Gateway decision is hashed using RFC-8785 JSON Canonicalization and chained into a SHA-256 Merkle ledger."
 
 **Screen Action / Demo Trigger:**
 - Switch to the **Checkpoints / Audit** tab.
 - Click **Verify Audit Integrity**.
-- Point to the verification result: `MERKLE CHAIN VERIFIED: True (100% Tamper-Proof)`.
+- Point to the verification result:
+> "Cryptographic verification confirms the stored audit chain is internally consistent and verified from the Genesis block."
 - Point to the **Counterfactual Replay**:
 > "We can also run counterfactual replays of any past trace to verify deterministic state reproducibility without re-triggering side effects."
 
@@ -125,9 +126,37 @@
 > 1. **Zero Direct Authority**: Agents only propose actions; the Gateway authorizes and executes.
 > 2. **Fail-Closed Isolation**: Network-isolated, capability-dropped sandbox containers.
 > 3. **Active Deception**: Canary honeytokens that catch compromised agents red-handed.
-> 4. **Immutable Auditability**: Cryptographic RFC-8785 Merkle chain verification.
+> 4. **Internally Consistent Auditability**: Cryptographic RFC-8785 Merkle chain verification.
 > 
 > Thank you, and we're ready for your questions!"
+
+---
+
+## 10-Minute Round 1 Battle Plan (Strict Time Budget)
+
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│                   10-MINUTE ROUND 1 PRESENTATION BUDGET                │
+├────────────────────────────────┬───────────────────────────────────────┤
+│ 00:00 - 03:00 (3 mins)         │ Live 3-Act Demo (ALLOW → BLOCK → HONEY)│
+│ 03:00 - 04:00 (1 min)          │ Audit Verification & Architecture     │
+│ 04:00 - 09:30 (5.5 mins)       │ Judge Q&A & Technical Deep-Dive       │
+│ 09:30 - 10:00 (30 secs)        │ Strong Closing Invariant Anchor       │
+└────────────────────────────────┴───────────────────────────────────────┘
+```
+
+### The 3 Non-Negotiable Anchors (Must Be Proven Before Time Runs Out)
+1. **The Invariant:** Agents *propose* actions; AgentGuard *decides* and executes.
+2. **The Contrast:** Legitimate calls pass (`ALLOW`), while prompt injection & path traversal fail-close (`BLOCK 0.00%`).
+3. **The Containment:** Honey asset canary touch instantly quarantines the agent and bumps security epoch.
+
+### Interruption Playbook (If the Judge Cuts In Early)
+- **If interrupted on Slide 1 / Problem Statement:**  
+  *Action:* Jump directly to the screen: "Let me show you live in 10 seconds." Click **Scenario 3 (Path Traversal)** → Show immediate `BLOCK` + `0.00%` execution.
+- **If asked about Docker Sandbox security:**  
+  *Action:* "We don't rely solely on container boundaries. Malicious actions are blocked at the Gateway before reaching the container. When allowed, the container runs read-only, non-root, capability-dropped, and network-disabled."
+- **If asked about multi-agent swarm propagation:**  
+  *Action:* Trigger **Scenario 5 (Honey Asset)** → Show the agent flip to `QUARANTINED` and epoch bump invalidating all swarm tokens.
 
 ---
 
@@ -137,6 +166,6 @@
 |---|---|
 | **"How do you stop an agent from bypassing the Gateway?"** | "Agents are given zero raw tool execution credentials or network socket access. Tools can only be invoked by the Gateway executor with internal capability keys. All agent calls must pass through the Gateway API with short-lived, task-bound cryptographic tokens." |
 | **"Is the Docker sandbox escape-proof?"** | "We follow defense-in-depth: the sandbox is hardened with read-only root filesystems, dropped capabilities (`cap_drop: ALL`), non-root execution (`10001:10001`), `no-new-privileges`, seccomp filters, and `network_mode: none`. More importantly, malicious actions are blocked at the Gateway before reaching the sandbox." |
-| **"What is the latency overhead of the Gateway?"** | "The core evaluation pipeline (token verification, parameter inspection, circuit breaker, and risk scoring) is purely in-memory and deterministic, taking under 2 milliseconds per request." |
-| **"How do Human-in-the-Loop approvals work?"** | "For high-risk operations, the Gateway returns `REQUIRE_APPROVAL` with a cryptographic action fingerprint. An operator must review and approve with a fresh cryptographic token, ensuring parameters cannot be modified in flight." |
+| **"What is the latency overhead of the Gateway?"** | "Under our measured test conditions, in-memory deterministic evaluation completes in 1–2 milliseconds per request (<0.5% of typical LLM generation latency)." |
+| **"How do Human-in-the-Loop approvals work?"** | "For high-risk operations, the Gateway returns `REQUIRE_APPROVAL` with a cryptographic action fingerprint. An operator reviews and approves with a fresh cryptographic token, ensuring parameters cannot be modified in flight." |
 | **"How do you handle multi-agent swarms?"** | "AgentGuard tracks inter-agent communication boundaries. If one agent in the mesh is quarantined or trips a circuit breaker, its communication edges and tokens are invalidated, preventing lateral movement across the swarm." |
