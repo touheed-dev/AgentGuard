@@ -102,9 +102,9 @@ This battle sheet prepares presenters for sharp, adversarial questions from tech
 ### Q6: "What is the runtime performance and latency overhead introduced by the Gateway?"
 
 * **10-Second Answer:**  
-  "Core deterministic evaluation completes in under 2 milliseconds, which is negligible compared to LLM inference latency."
+  "Under our measured test conditions, in-memory deterministic evaluation completes in under 2 milliseconds, which is negligible compared to LLM inference latency."
 * **30-Second Technical Answer:**  
-  "Because all Gateway checks—cryptographic token validation, circuit breaker inspection, parameter validation, risk scoring, and canary checks—are performed in-memory using compiled rules, evaluation takes 1–2ms. Compared to LLM generation times of 500ms–2000ms, the Gateway overhead is less than 0.5% of total request duration."
+  "Because all Gateway checks—cryptographic token validation, circuit breaker inspection, parameter validation, risk scoring, and canary checks—are evaluated in-process using compiled rules, local evaluation overhead is measured at 1–2ms. Compared to typical LLM generation times of 500ms–2000ms, this evaluation overhead represents less than 0.5% of total request turnaround."
 * **Evidence / Demo Location:**  
   - [docs/FINAL_BUILD_REPORT.md](file:///w:/AgentGuard/docs/FINAL_BUILD_REPORT.md).
   - Telemetry Chart on dashboard Command Center.
@@ -112,7 +112,7 @@ This battle sheet prepares presenters for sharp, adversarial questions from tech
   *"Does PostgreSQL persistence slow down execution?"*  
   **Counter:** "We use async outbox and Valkey for ephemeral coordination, ensuring the hot path is non-blocking."
 * **What NOT to Claim:**  
-  ❌ *Do NOT claim 0.00ms latency.* State realistic 1–2ms in-memory throughput.
+  ❌ *Do NOT claim <2ms is a universal SLA guarantee across all network topologies.* Frame it accurately as the measured in-memory deterministic evaluation overhead under tested conditions.
 
 ---
 
