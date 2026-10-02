@@ -56,6 +56,11 @@ class LLMProvider(ABC):
         raise NotImplementedError
 
 
+class LLMProviderError(RuntimeError):
+    """Raised when an LLM provider fails to generate a completion."""
+    pass
+
+
 class ReplayLLMProvider(LLMProvider):
     def __init__(self, predefined_responses: dict[str, str] | None = None) -> None:
         self._responses = predefined_responses or {
@@ -87,15 +92,95 @@ class ReplayLLMProvider(LLMProvider):
         )
 
 
+class OllamaLLMProvider(LLMProvider):
+    """Local Ollama provider for local airgapped execution."""
+
+    def __init__(
+        self,
+        base_url: str = "http://localhost:11434",
+        default_model: str = "llama3.2:latest",
+        fallback_provider: LLMProvider | None = None,
+    ) -> None:
+        self.base_url = base_url
+        self.default_model = default_model
+        self.fallback_provider = fallback_provider
+
+    def generate(self, request: LLMRequest) -> LLMResponse:
+        start = time.perf_counter()
+        model_name = request.model or self.default_model
+        try:
+            import urllib.request
+            payload = json.dumps({
+                "model": model_name,
+                "prompt": f"{request.system_prompt}\n\n{request.prompt}" if request.system_prompt else request.prompt,
+                "stream": False,
+            }).encode("utf-8")
+            req = urllib.request.Request(
+                f"{self.base_url}/api/generate",
+                data=payload,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=10.0) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                content = data.get("response", "")
+                tokens = len(content.split())
+        except Exception as err:
+            if self.fallback_provider is not None:
+                logger.warning("Ollama provider failed, using fallback: %s", err)
+                res = self.fallback_provider.generate(request)
+                return LLMResponse(
+                    content=res.content,
+                    provider=f"fallback:{res.provider}",
+                    model=res.model,
+                    mode="fallback",
+                    tokens_used=res.tokens_used,
+                    cached=res.cached,
+                    latency_ms=(time.perf_counter() - start) * 1000.0,
+                    trace_id=request.trace_id,
+                )
+            raise LLMProviderError(f"Ollama local provider failed: {err}") from err
+
+        latency_ms = (time.perf_counter() - start) * 1000.0
+        return LLMResponse(
+            content=content,
+            provider="ollama",
+            model=model_name,
+            mode="local",
+            tokens_used=tokens,
+            cached=False,
+            latency_ms=latency_ms,
+            trace_id=request.trace_id,
+        )
+
+
 class GroqLLMProvider(LLMProvider):
-    def __init__(self, api_key: str | None = None, default_model: str = "llama-3.3-70b-versatile") -> None:
+    def __init__(
+        self,
+        api_key: str | None = None,
+        default_model: str = "llama-3.3-70b-versatile",
+        fallback_provider: LLMProvider | None = None,
+    ) -> None:
         self._api_key = api_key or os.getenv("GROQ_API_KEY", "")
         self.default_model = default_model
+        self.fallback_provider = fallback_provider
 
     def generate(self, request: LLMRequest) -> LLMResponse:
         if not self._api_key:
-            raise RuntimeError("GROQ_API_KEY is not configured. Fallback to ReplayLLMProvider.")
-        
+            if self.fallback_provider is not None:
+                res = self.fallback_provider.generate(request)
+                return LLMResponse(
+                    content=res.content,
+                    provider=f"fallback:{res.provider}",
+                    model=res.model,
+                    mode="fallback",
+                    tokens_used=res.tokens_used,
+                    cached=res.cached,
+                    latency_ms=res.latency_ms,
+                    trace_id=request.trace_id,
+                )
+            raise LLMProviderError("GROQ_API_KEY is not configured.")
+
         start = time.perf_counter()
         try:
             from groq import Groq
@@ -111,9 +196,21 @@ class GroqLLMProvider(LLMProvider):
             )
             content = completion.choices[0].message.content or ""
             tokens = completion.usage.total_tokens if completion.usage else len(content.split())
-        except Exception:
-            content = f"[Groq simulated completion for model {request.model}]: Processed prompt."
-            tokens = len(content.split())
+        except Exception as err:
+            if self.fallback_provider is not None:
+                logger.warning("Groq live provider failed, using fallback: %s", err)
+                res = self.fallback_provider.generate(request)
+                return LLMResponse(
+                    content=res.content,
+                    provider=f"fallback:{res.provider}",
+                    model=res.model,
+                    mode="fallback",
+                    tokens_used=res.tokens_used,
+                    cached=res.cached,
+                    latency_ms=(time.perf_counter() - start) * 1000.0,
+                    trace_id=request.trace_id,
+                )
+            raise LLMProviderError(f"Groq live provider failed: {err}") from err
 
         latency_ms = (time.perf_counter() - start) * 1000.0
         return LLMResponse(

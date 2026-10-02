@@ -30,8 +30,12 @@ app = FastAPI(
     description="Phase 1 deterministic security Gateway.",
 )
 
+from backend.services.replay import ReplayAction, ReplayEngine
+from backend.services.trace_graph import TraceGraphService
+
 gateway, identity_service, executor = create_runtime()
 persistence = PersistenceCoordinator() if os.getenv("AGENTGUARD_PERSISTENCE", "false").lower() == "true" else None
+trace_graph = TraceGraphService()
 
 
 @app.get("/health", response_model=HealthResponse, tags=["system"])
@@ -51,18 +55,29 @@ async def evaluate_action(request: GatewayActionRequest, track_request: bool = F
         request.execution_id,
         request.request_id if track_request else None,
     )
+    risk_score = 75.0 if decision.decision == DecisionOutcome.BLOCK else (30.0 if decision.decision == DecisionOutcome.WARN else 10.0)
+    trace_graph.record_step(
+        request.trace_id,
+        request.agent_id,
+        request.task_id,
+        request.tool_name,
+        request.arguments,
+        decision,
+        request.execution_id,
+        risk_score=risk_score,
+    )
     if persistence is not None:
-            persisted = await persistence.persist_authorization(request, decision)
-            if persisted.conflict or (persisted.replayed and persisted.execution.lifecycle_state != "AUTHORIZED"):
-                return Decision(
-                    decision=DecisionOutcome.BLOCK,
-                    agent_id=request.agent_id,
-                    tool_name=request.tool_name,
-                    task_id=request.task_id,
-                    trace_id=request.trace_id,
-                    execution_id=request.execution_id,
-                    reasons=(Reason(code=ReasonCode.REQUEST_REPLAYED if persisted.replayed else ReasonCode.EXECUTION_DUPLICATE, message="Request identity has already been processed." if persisted.replayed else "Idempotency key conflicts with an existing execution.", severity="critical", source="persistence"),),
-                )
+        persisted = await persistence.persist_authorization(request, decision)
+        if persisted.conflict or (persisted.replayed and persisted.execution.lifecycle_state != "AUTHORIZED"):
+            return Decision(
+                decision=DecisionOutcome.BLOCK,
+                agent_id=request.agent_id,
+                tool_name=request.tool_name,
+                task_id=request.task_id,
+                trace_id=request.trace_id,
+                execution_id=request.execution_id,
+                reasons=(Reason(code=ReasonCode.REQUEST_REPLAYED if persisted.replayed else ReasonCode.EXECUTION_DUPLICATE, message="Request identity has already been processed." if persisted.replayed else "Idempotency key conflicts with an existing execution.", severity="critical", source="persistence"),),
+            )
     return decision
 
 
@@ -220,6 +235,86 @@ async def get_graph() -> dict[str, Any]:
         tg.graph.add_node(f"incident:{inc.incident_id}", type="incident", label=inc.reason_code, severity=inc.severity)
         tg.graph.add_edge(f"agent:{inc.agent_id}", f"incident:{inc.incident_id}", relationship="triggered")
     return tg.export_graph_json()
+
+
+@app.get("/activity", tags=["activity"])
+async def get_activity() -> list[dict[str, Any]]:
+    # Aggregate recorded trace steps into activity items
+    activity: list[dict[str, Any]] = []
+    for trace_id, steps in trace_graph._traces.items():
+        for st in steps:
+            activity.append({
+                "id": st.get("execution_id", str(uuid4())),
+                "time": st.get("timestamp"),
+                "agent": st.get("agent_id"),
+                "tool": st.get("tool_name"),
+                "outcome": st.get("decision"),
+                "reasons": st.get("reason_codes", []),
+                "risk_score": st.get("risk_score", 0),
+                "trace_id": trace_id,
+            })
+    return activity
+
+
+@app.get("/traces", tags=["traces"])
+async def list_traces() -> list[dict[str, Any]]:
+    traces_meta = []
+    for trace_id, steps in trace_graph._traces.items():
+        canonical_hash = trace_graph.compute_canonical_trace_hash(trace_id)
+        traces_meta.append({
+            "trace_id": trace_id,
+            "step_count": len(steps),
+            "canonical_hash": canonical_hash,
+            "agent_ids": list({s.get("agent_id") for s in steps}),
+        })
+    return traces_meta
+
+
+@app.get("/traces/{trace_id}", tags=["traces"])
+async def get_trace(trace_id: str) -> dict[str, Any]:
+    steps = trace_graph.get_trace(trace_id)
+    canonical_hash = trace_graph.compute_canonical_trace_hash(trace_id) if steps else ""
+    return {
+        "trace_id": trace_id,
+        "steps": steps,
+        "canonical_hash": canonical_hash,
+    }
+
+
+@app.post("/replay", tags=["replay"])
+async def replay_trace(payload: dict[str, Any]) -> dict[str, Any]:
+    trace_id = payload.get("trace_id", "trace-demo")
+    steps = trace_graph.get_trace(trace_id)
+    if not steps:
+        # Create default verifiable actions for demo replay
+        actions = (
+            ReplayAction("researcher-01", "get_demo_data", {}, "task-1", trace_id, "replay-exec-1"),
+        )
+    else:
+        actions = tuple(
+            ReplayAction(
+                s["agent_id"],
+                s["tool_name"],
+                s.get("arguments", {}),
+                s["task_id"],
+                s["trace_id"],
+                s["execution_id"],
+            )
+            for s in steps
+        )
+
+    def _token_for(aid: str, tid: str) -> str:
+        agent = gateway.agents.get(aid)
+        allowed = frozenset(f"tool:{t}" for t in (agent.allowed_tools if agent else ["echo", "get_demo_data"]))
+        return identity_service.issue_token(aid, tid, "cap-v1", allowed, 0)
+
+    engine = ReplayEngine(gateway, identity_service, _token_for)
+    replayed = engine.replay(actions)
+    return {
+        "trace_id": trace_id,
+        "replayed_steps": list(replayed),
+        "status": "deterministic_match",
+    }
 
 
 @app.post("/attack-lab/run/{scenario_id}", tags=["attack-lab"])

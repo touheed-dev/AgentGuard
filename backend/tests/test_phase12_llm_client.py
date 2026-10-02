@@ -1,7 +1,14 @@
 """Tests for LLM Client abstraction (Groq, Replay, caching, budgeting, redaction)."""
 
 import pytest
-from backend.services.llm_client import LLMClient, LLMRequest, ReplayLLMProvider, GroqLLMProvider
+from backend.services.llm_client import (
+    LLMClient,
+    LLMProviderError,
+    LLMRequest,
+    OllamaLLMProvider,
+    ReplayLLMProvider,
+    GroqLLMProvider,
+)
 
 
 def test_llm_client_replay_mode() -> None:
@@ -72,7 +79,33 @@ def test_llm_client_budget_limit() -> None:
         client.generate(req2)
 
 
-def test_groq_fallback_when_no_api_key() -> None:
+def test_groq_failure_raises_explicit_error_without_fallback() -> None:
     groq = GroqLLMProvider(api_key="")
-    with pytest.raises(RuntimeError, match="GROQ_API_KEY is not configured"):
+    with pytest.raises(Exception, match="GROQ_API_KEY is not configured"):
         groq.generate(LLMRequest(prompt="Hello"))
+
+
+def test_groq_explicit_fallback_mode_tracking() -> None:
+    fallback = ReplayLLMProvider({"safe": "Fallback plan output."})
+    groq = GroqLLMProvider(api_key="", fallback_provider=fallback)
+
+    req = LLMRequest(prompt="Execute safe operation", trace_id="trace-fb-1")
+    res = groq.generate(req)
+    assert res.mode == "fallback"
+    assert "fallback" in res.provider
+    assert res.content == "Fallback plan output."
+    assert res.trace_id == "trace-fb-1"
+
+
+def test_ollama_failure_and_fallback() -> None:
+    # Test failing ollama provider (invalid URL)
+    ollama = OllamaLLMProvider(base_url="http://127.0.0.1:9", fallback_provider=None)
+    with pytest.raises(Exception, match="Ollama local provider failed"):
+        ollama.generate(LLMRequest(prompt="Test prompt"))
+
+    # Test ollama with explicit fallback
+    fallback = ReplayLLMProvider({"test": "Ollama fallback result"})
+    ollama_fb = OllamaLLMProvider(base_url="http://127.0.0.1:9", fallback_provider=fallback)
+    res = ollama_fb.generate(LLMRequest(prompt="Test prompt"))
+    assert res.mode == "fallback"
+    assert res.content == "Ollama fallback result"

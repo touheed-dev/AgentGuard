@@ -109,3 +109,35 @@ export interface AuditVerification {
   checked_events: number;
   error?: string | null;
 }
+
+export interface TraceStep {
+  trace_id: string;
+  agent_id: string;
+  task_id: string;
+  tool_name: string;
+  arguments: Record<string, any>;
+  decision: DecisionOutcome;
+  reason_codes: string[];
+  execution_id: string;
+  result?: Record<string, any> | null;
+  incident_id?: string | null;
+  risk_score: number;
+  timestamp: number;
+}
+
+export interface TraceMeta {
+  trace_id: string;
+  step_count: number;
+  canonical_hash: string;
+  agent_ids: string[];
+}
+
+export interface ReplayResponse {
+  trace_id: string;
+  replayed_steps: Array<{
+    execution_id: string;
+    decision: any;
+    result: any;
+  }>;
+  status: string;
+}

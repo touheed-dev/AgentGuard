@@ -15,17 +15,26 @@ interface ActivityItem {
 }
 
 export default function LiveActivityPage() {
-  const [events, setEvents] = useState<ActivityItem[]>([
-    {
-      id: "ev-init-1",
-      time: new Date().toLocaleTimeString(),
-      agent: "researcher-01",
-      tool: "get_demo_data",
-      outcome: "ALLOW",
-      reasons: [],
-      risk_score: 15,
-    },
-  ]);
+  const [events, setEvents] = useState<ActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function loadActivity() {
+    try {
+      setLoading(true);
+      const data = await fetchApi<ActivityItem[]>("/activity");
+      setEvents(data);
+    } catch {
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadActivity();
+    const interval = setInterval(loadActivity, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -56,32 +65,40 @@ export default function LiveActivityPage() {
         </div>
 
         <div className="divide-y divide-slate-800/60">
-          {events.map((ev) => (
-            <div key={ev.id} className="grid grid-cols-12 gap-2 px-6 py-4 items-center text-sm hover:bg-slate-800/30 transition-colors">
-              <div className="col-span-2 font-mono text-xs text-slate-400">{ev.time}</div>
-              <div className="col-span-2 font-mono text-xs text-slate-200">{ev.agent}</div>
-              <div className="col-span-2 font-mono text-xs text-cyan-300">{ev.tool}</div>
-              <div className="col-span-2">
-                <span
-                  className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded border ${
-                    ev.outcome === "ALLOW"
-                      ? "bg-emerald-950 text-emerald-400 border-emerald-800"
-                      : ev.outcome === "BLOCK"
-                      ? "bg-rose-950 text-rose-400 border-rose-800"
-                      : "bg-amber-950 text-amber-400 border-amber-800"
-                  }`}
-                >
-                  {ev.outcome}
-                </span>
-              </div>
-              <div className="col-span-3 text-xs text-slate-300 truncate">
-                {ev.reasons.length > 0 ? ev.reasons.join(", ") : "Standard capability granted"}
-              </div>
-              <div className="col-span-1 text-right font-mono text-xs font-semibold text-slate-300">
-                {ev.risk_score}
-              </div>
+          {events.length === 0 ? (
+            <div className="py-12 text-center text-xs font-mono text-slate-500">
+              No live activity events recorded yet. Execute actions or run Attack Lab scenarios to see real-time evaluations.
             </div>
-          ))}
+          ) : (
+            events.map((ev) => (
+              <div key={ev.id} className="grid grid-cols-12 gap-2 px-6 py-4 items-center text-sm hover:bg-slate-800/30 transition-colors">
+                <div className="col-span-2 font-mono text-xs text-slate-400">
+                  {typeof ev.time === "number" ? new Date(ev.time * 1000).toLocaleTimeString() : ev.time || "N/A"}
+                </div>
+                <div className="col-span-2 font-mono text-xs text-slate-200">{ev.agent}</div>
+                <div className="col-span-2 font-mono text-xs text-cyan-300">{ev.tool}</div>
+                <div className="col-span-2">
+                  <span
+                    className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded border ${
+                      ev.outcome === "ALLOW"
+                        ? "bg-emerald-950 text-emerald-400 border-emerald-800"
+                        : ev.outcome === "BLOCK"
+                        ? "bg-rose-950 text-rose-400 border-rose-800"
+                        : "bg-amber-950 text-amber-400 border-amber-800"
+                    }`}
+                  >
+                    {ev.outcome}
+                  </span>
+                </div>
+                <div className="col-span-3 text-xs text-slate-300 truncate">
+                  {ev.reasons && ev.reasons.length > 0 ? ev.reasons.join(", ") : "Standard capability granted"}
+                </div>
+                <div className="col-span-1 text-right font-mono text-xs font-semibold text-slate-300">
+                  {ev.risk_score}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

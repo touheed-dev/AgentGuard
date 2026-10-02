@@ -26,6 +26,7 @@ def test_docker_sandbox_profile_security_defaults() -> None:
     assert args["user"] == "10001:10001"
     assert args["cap_drop"] == ["ALL"]
     assert "no-new-privileges:true" in args["security_opt"]
+    assert "seccomp:default_hardened.json" in args["security_opt"]
     assert args["mem_limit"] == "512m"
 
 
@@ -33,6 +34,12 @@ def test_docker_socket_mounting_is_forbidden() -> None:
     unsafe_profile = DockerSandboxProfile(docker_socket_mounted=True)
     with pytest.raises(PermissionError, match="Docker socket mounting is strictly forbidden"):
         unsafe_profile.to_docker_run_args("img", ["cmd"])
+
+
+def test_unconfined_seccomp_is_forbidden() -> None:
+    unconfined_profile = DockerSandboxProfile(seccomp_profile="unconfined")
+    with pytest.raises(ValueError, match="unconfined seccomp profile is strictly forbidden"):
+        unconfined_profile.to_docker_run_args("img", ["cmd"])
 
 
 def test_hardened_docker_executor_requires_gateway_grant() -> None:

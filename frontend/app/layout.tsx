@@ -80,6 +80,13 @@ export default function RootLayout({
                 Approvals
               </Link>
               <Link
+                href="/traces"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
+              >
+                <FileSearch className="h-3.5 w-3.5 text-cyan-400" />
+                Trace Explorer
+              </Link>
+              <Link
                 href="/attack-lab"
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-rose-300 bg-rose-950/40 border border-rose-800/60 hover:bg-rose-900/50 hover:text-rose-200 transition-colors"
               >

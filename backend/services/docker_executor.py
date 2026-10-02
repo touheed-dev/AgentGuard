@@ -37,13 +37,21 @@ class DockerSandboxProfile:
     pids_limit: int = 64
     tmpfs: dict[str, str] = field(default_factory=lambda: {"/tmp": "rw,noexec,nosuid,nodev,size=64m"})
     docker_socket_mounted: bool = False
-    seccomp_profile: str = "default_hardened"
+    seccomp_profile: str = "default_hardened.json"
     timeout_seconds: float = 30.0
 
     def to_docker_run_args(self, image: str, command: list[str]) -> dict[str, Any]:
         """Generate kwargs compatible with the docker-py containers.run API."""
         if self.docker_socket_mounted:
             raise PermissionError("Docker socket mounting is strictly forbidden in sandbox profile.")
+        if "unconfined" in self.seccomp_profile.lower():
+            raise ValueError("unconfined seccomp profile is strictly forbidden in hardened sandbox.")
+
+        security_opts = [f"no-new-privileges:{str(self.no_new_privileges).lower()}"]
+        if self.seccomp_profile:
+            opt = self.seccomp_profile if self.seccomp_profile.startswith("seccomp:") else f"seccomp:{self.seccomp_profile}"
+            security_opts.append(opt)
+
         return {
             "image": image,
             "command": command,
@@ -51,7 +59,7 @@ class DockerSandboxProfile:
             "network_mode": "none" if self.network_disabled else "bridge",
             "user": self.user,
             "cap_drop": list(self.cap_drop),
-            "security_opt": [f"no-new-privileges:{str(self.no_new_privileges).lower()}"],
+            "security_opt": security_opts,
             "mem_limit": self.memory_limit,
             "nano_cpus": int(self.cpu_limit * 1e9),
             "pids_limit": self.pids_limit,
