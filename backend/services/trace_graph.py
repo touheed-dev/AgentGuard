@@ -61,8 +61,21 @@ class TraceGraphService:
         incident_id: str | None = None,
         risk_score: float = 0.0,
         now: float | None = None,
+        llm_metadata: dict[str, Any] | None = None,
     ) -> None:
         ts = time.time() if now is None else float(now)
+        clean_llm_meta: dict[str, str] = {}
+        if llm_metadata:
+            for k in ("llm_provider", "model", "mode"):
+                if k in llm_metadata and isinstance(llm_metadata[k], str):
+                    clean_llm_meta[k] = llm_metadata[k]
+        else:
+            clean_llm_meta = {
+                "llm_provider": "replay",
+                "model": "replay",
+                "mode": "replay",
+            }
+
         step = {
             "trace_id": trace_id,
             "agent_id": agent_id,
@@ -76,6 +89,7 @@ class TraceGraphService:
             "incident_id": incident_id,
             "risk_score": risk_score,
             "timestamp": ts,
+            **clean_llm_meta,
         }
         self._traces.setdefault(trace_id, []).append(step)
 

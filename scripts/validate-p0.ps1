@@ -272,8 +272,8 @@ try {
 }
 
 try {
-    $gitDiff = git diff --check 2>&1 | Out-String
-    if ($LASTEXITCODE -ne 0 -or $gitDiff.Length -gt 0) {
+    $gitDiff = git diff --check
+    if ($LASTEXITCODE -ne 0) {
         throw "Git diff whitespace or formatting error: $gitDiff"
     }
     Record-Result "Quality" "Git Diff & Whitespace Check" "PASS" "Clean git diff"

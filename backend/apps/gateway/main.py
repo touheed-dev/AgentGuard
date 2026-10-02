@@ -11,6 +11,7 @@ from backend.shared.contracts import ActionRequest, Decision, DecisionOutcome, H
 
 class GatewayActionRequest(ActionRequest):
     token: str = Field(min_length=1)
+    llm_metadata: dict[str, str] | None = None
 
 
 class ExecutionResponse(StrictModel):
@@ -65,6 +66,7 @@ async def evaluate_action(request: GatewayActionRequest, track_request: bool = F
         decision,
         request.execution_id,
         risk_score=risk_score,
+        llm_metadata=request.llm_metadata,
     )
     if persistence is not None:
         persisted = await persistence.persist_authorization(request, decision)

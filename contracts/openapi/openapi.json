@@ -186,6 +186,20 @@
             "$ref": "#/components/schemas/ExecutionState",
             "default": "REQUESTED"
           },
+          "llm_metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Llm Metadata"
+          },
           "request_id": {
             "minLength": 1,
             "title": "Request Id",
