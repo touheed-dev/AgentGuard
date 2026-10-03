@@ -31,8 +31,8 @@ ALL_TOOLS = (
 ALL_SCOPES = frozenset({f"tool:{t}" for t in ALL_TOOLS})
 
 
-def create_runtime() -> tuple[Gateway, IdentityService, StubExecutor]:
-    identity = IdentityService()
+def create_runtime(identity: IdentityService | None = None) -> tuple[Gateway, IdentityService, StubExecutor]:
+    identity = identity or IdentityService()
     agents = AgentRegistry(
         (
             Agent(
