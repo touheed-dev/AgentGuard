@@ -4,6 +4,7 @@ import { RealtimeEcosystemView } from './components/RealtimeEcosystemView';
 import { PipelineDeepDiveView } from './components/PipelineDeepDiveView';
 import { AttackLabView } from './components/AttackLabView';
 import { CheckpointsView } from './components/CheckpointsView';
+import { RuntimeIntegrityView } from './components/RuntimeIntegrityView';
 import { EventDetailDrawer } from './components/EventDetailDrawer';
 import { api } from './api';
 import {
@@ -470,6 +471,17 @@ export function App() {
               onRunMilestones={handleRunMilestones}
               isRunningMilestones={isRunningMilestones}
               ledgerBlocks={ledgerBlocks}
+            />
+          )}
+          {activeTab === 'runtime-integrity' && (
+            <RuntimeIntegrityView
+              agents={agents}
+              interceptions={interceptions}
+              approvals={approvals}
+              ledgerBlocks={ledgerBlocks}
+              onQuarantineAgent={handleQuarantineAgent}
+              onResetAgent={handleResetAgent}
+              onBumpEpoch={handleBumpEpoch}
             />
           )}
         </div>

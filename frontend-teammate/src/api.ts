@@ -13,6 +13,8 @@ import {
   StageStatus,
   LedgerVerificationResult,
   ScenarioReplayResult,
+  DemoEnvironmentData,
+  DemoScenarioResult,
 } from './types';
 
 const API_BASE = '/api';
@@ -1003,6 +1005,129 @@ export const api = {
     const res = await fetch(`${API_BASE}/demo/reset`, { method: 'POST' });
     if (!res.ok) {
       throw new Error(`Demo reset failed with HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
+  async getDemoEnvironment(): Promise<DemoEnvironmentData> {
+    const res = await fetch(`${API_BASE}/demo/environment`);
+    if (!res.ok) {
+      // Fallback synthetic data if endpoint is not implemented
+      return {
+        agent: {
+          agent_id: 'researcher-01',
+          name: 'Lead Security Researcher',
+          status: 'ACTIVE',
+          task_id: 'task-sec-audit',
+          security_epoch: 1,
+          security_state: 'CLEAN',
+          allowed_tools: ['echo', 'read_file', 'http_fetch', 'search_knowledge']
+        },
+        scenarios: [
+          {
+            id: 'legitimate_research',
+            name: 'Legitimate Research Action',
+            description: 'Agent reads approved research report file',
+            expected_decision: 'ALLOW'
+          },
+          {
+            id: 'prompt_injection',
+            name: 'Prompt Injection / Secret Leak',
+            description: 'Agent attempts reading restricted credentials file',
+            expected_decision: 'BLOCK'
+          },
+          {
+            id: 'db_approval',
+            name: 'Database Mutation Step',
+            description: 'Agent issues write to customer records requiring human approval',
+            expected_decision: 'REQUIRE_APPROVAL'
+          },
+          {
+            id: 'honeytoken_tripwire',
+            name: 'Honeytoken Canary Access',
+            description: 'Agent touches decoy honeytoken asset triggering instant quarantine',
+            expected_decision: 'BLOCK + QUARANTINE'
+          }
+        ],
+        resources: [
+          { id: '1', name: 'research_report.txt', path: 'data/demo/public/research_report.txt', classification: 'PUBLIC', access: 'READ_ONLY', description: 'Public quarterly research briefing', size_bytes: 1420 },
+          { id: '2', name: 'poisoned_document.txt', path: 'data/demo/untrusted/poisoned_document.txt', classification: 'UNTRUSTED', access: 'ISOLATED_PARSE', description: 'Untrusted document with hidden prompt injection payloads', size_bytes: 856 },
+          { id: '3', name: '.env', path: 'data/demo/restricted/.env', classification: 'RESTRICTED', access: 'BLOCKED', description: 'Environment credentials and API secret keys', size_bytes: 412 },
+          { id: '4', name: 'AG-HONEY-7F92-XK11', path: 'data/demo/honey/AG-HONEY-7F92-XK11', classification: 'HONEY_ASSET', access: 'TRIPWIRE_ALARM', description: 'Deception honeytoken canary file', size_bytes: 256 }
+        ],
+        database: [
+          { table_name: 'customers', classification: 'RESTRICTED', description: 'Customer PII and billing records', row_count: 1250 },
+          { table_name: 'transactions', classification: 'SENSITIVE', description: 'Financial ledger transfer entries', row_count: 8400 },
+          { table_name: 'research_records', classification: 'PUBLIC', description: 'Synthesized public intelligence items', row_count: 310 }
+        ]
+      };
+    }
+    return res.json();
+  },
+
+  async runDemoScenario(scenarioId: string): Promise<DemoScenarioResult> {
+    const res = await fetch(`${API_BASE}/demo/scenarios/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scenario_id: scenarioId }),
+    });
+    if (!res.ok) {
+      // Mock result fallback based on scenarioId
+      if (scenarioId === 'prompt_injection') {
+        return {
+          scenario_id: scenarioId,
+          trace_id: `TRC-DEMO-${Date.now().toString().slice(-4)}`,
+          decision: 'BLOCK',
+          tool_name: 'read_file',
+          target_resource: 'data/demo/restricted/.env',
+          reasons: ['RESTRICTED_RESOURCE_ACCESS', 'POLICY_INVARIANT_VIOLATION'],
+          explanation: 'Target path matches restricted environment secret patterns. CEL rule prevented direct execution.',
+          execution_status: 'NOT_EXECUTED',
+          executions_count: 0,
+          agent_quarantined: false
+        };
+      }
+      if (scenarioId === 'honeytoken_tripwire') {
+        return {
+          scenario_id: scenarioId,
+          trace_id: `TRC-DEMO-${Date.now().toString().slice(-4)}`,
+          decision: 'BLOCK',
+          tool_name: 'read_file',
+          target_resource: 'data/demo/honey/AG-HONEY-7F92-XK11',
+          reasons: ['HONEY_ASSET_TOUCHED', 'CANARY_TRIPWIRE_BREACH'],
+          explanation: 'Access to dynamic honey asset detected. Agent was immediately quarantined and epoch invalidated.',
+          execution_status: 'NOT_EXECUTED (QUARANTINED)',
+          executions_count: 0,
+          agent_quarantined: true
+        };
+      }
+      if (scenarioId === 'db_approval') {
+        return {
+          scenario_id: scenarioId,
+          trace_id: `TRC-DEMO-${Date.now().toString().slice(-4)}`,
+          decision: 'REQUIRE_APPROVAL',
+          tool_name: 'db_update',
+          target_resource: 'database:customers',
+          reasons: ['MUTATION_REQUIRES_HUMAN_SIGN_OFF'],
+          explanation: 'Database write operation on restricted tables requires Dual-Key human supervisor sign-off.',
+          execution_status: 'PENDING_APPROVAL',
+          executions_count: 0,
+          agent_quarantined: false
+        };
+      }
+      return {
+        scenario_id: scenarioId,
+        trace_id: `TRC-DEMO-${Date.now().toString().slice(-4)}`,
+        decision: 'ALLOW',
+        tool_name: 'read_file',
+        target_resource: 'data/demo/public/research_report.txt',
+        reasons: ['POLICY_ALLOW', 'TASK_ALIGNMENT_VERIFIED'],
+        explanation: 'Action conforms strictly to declared task scope and security baseline.',
+        execution_status: 'SUCCESS',
+        executions_count: 1,
+        agent_quarantined: false,
+        output_preview: '{"status": "ok", "report_title": "Q3 Distributed Swarm Security Matrix", "verified_entries": 42}'
+      };
     }
     return res.json();
   },

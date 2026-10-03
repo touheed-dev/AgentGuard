@@ -174,3 +174,57 @@ export interface ScenarioReplayResult {
   agent_status: string;
   executed: boolean;
 }
+
+export interface DemoScenarioInfo {
+  id: string;
+  name: string;
+  description: string;
+  expected_decision: string;
+}
+
+export interface DemoResourceItem {
+  id: string;
+  name: string;
+  path: string;
+  classification: string;
+  access: string;
+  description: string;
+  size_bytes: number;
+}
+
+export interface DemoDatabaseItem {
+  table_name: string;
+  classification: string;
+  description: string;
+  row_count: number;
+}
+
+export interface DemoEnvironmentData {
+  agent: {
+    agent_id: string;
+    name: string;
+    status: string;
+    task_id: string;
+    security_epoch: number;
+    security_state: string;
+    allowed_tools: string[];
+  };
+  scenarios: DemoScenarioInfo[];
+  resources: DemoResourceItem[];
+  database: DemoDatabaseItem[];
+}
+
+export interface DemoScenarioResult {
+  scenario_id: string;
+  trace_id: string;
+  decision: string;
+  tool_name: string;
+  target_resource: string;
+  reasons: string[];
+  explanation: string;
+  execution_status: string;
+  executions_count: number;
+  agent_quarantined: boolean;
+  output_preview?: string | null;
+}
+

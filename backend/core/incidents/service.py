@@ -34,10 +34,39 @@ class Incident:
     dedup_key: str = ""
 
 
+@dataclass(frozen=True)
+class SecuritySOSEvent:
+    event_type: str
+    incident_id: str
+    agent_id: str
+    reason_code: str
+    severity: str
+    created_at: float
+    task_id: str = ""
+    trace_id: str = ""
+    details: dict[str, Any] = field(default_factory=dict)
+
+
 class IncidentService:
     def __init__(self) -> None:
         self._incidents: dict[str, Incident] = {}
         self._dedup_map: dict[str, str] = {}
+        self._sos_events: list[SecuritySOSEvent] = []
+        self._sos_subscribers: list[Any] = []
+
+    def add_sos_subscriber(self, callback: Any) -> None:
+        if callback not in self._sos_subscribers:
+            self._sos_subscribers.append(callback)
+
+    def remove_sos_subscriber(self, callback: Any) -> None:
+        if callback in self._sos_subscribers:
+            self._sos_subscribers.remove(callback)
+
+    def get_sos_events(self) -> list[SecuritySOSEvent]:
+        return list(self._sos_events)
+
+    def clear_sos_events(self) -> None:
+        self._sos_events.clear()
 
     def create(
         self,
@@ -56,6 +85,7 @@ class IncidentService:
             return self._incidents[existing_id]
 
         incident_id = str(uuid4())
+        created_time = time.time() if now is None else float(now)
         incident = Incident(
             incident_id=incident_id,
             agent_id=agent_id,
@@ -64,12 +94,32 @@ class IncidentService:
             reason_code=reason_code,
             severity=severity,
             state=IncidentState.DETECTED,
-            created_at=time.time() if now is None else float(now),
+            created_at=created_time,
             details=details or {},
             dedup_key=dedup_key,
         )
         self._incidents[incident_id] = incident
         self._dedup_map[dedup_key] = incident_id
+
+        if severity == "critical":
+            sos_event = SecuritySOSEvent(
+                event_type="security.sos",
+                incident_id=incident_id,
+                agent_id=agent_id,
+                reason_code=reason_code,
+                severity=severity,
+                created_at=created_time,
+                task_id=task_id,
+                trace_id=trace_id,
+                details=details or {},
+            )
+            self._sos_events.append(sos_event)
+            for subscriber in list(self._sos_subscribers):
+                try:
+                    subscriber(sos_event)
+                except Exception:
+                    pass
+
         return incident
 
     def transition(self, incident_id: str, new_state: IncidentState) -> Incident:
@@ -96,3 +146,4 @@ class IncidentService:
 
     def list(self) -> tuple[Incident, ...]:
         return tuple(self._incidents.values())
+

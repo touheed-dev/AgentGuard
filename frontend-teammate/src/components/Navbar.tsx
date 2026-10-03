@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 
-export type DashboardTab = 'realtime-ecosystem' | 'advanced-security' | 'orchestration-audit' | 'simulation-lab';
+export type DashboardTab = 'realtime-ecosystem' | 'runtime-integrity' | 'advanced-security' | 'orchestration-audit' | 'simulation-lab';
 
 interface NavbarProps {
   activeTab: DashboardTab;
@@ -94,6 +94,16 @@ export const Navbar: React.FC<NavbarProps> = ({
       badgePulse: true,
       badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
       accentColor: '#047857',
+    },
+    {
+      id: 'runtime-integrity',
+      label: 'Runtime Integrity',
+      sublabel: 'Autonomous Agent Monitor',
+      icon: Shield,
+      badge: 'INTEGRITY 100%',
+      badgePulse: true,
+      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      accentColor: '#059669',
     },
     {
       id: 'advanced-security',

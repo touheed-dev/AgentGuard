@@ -388,3 +388,22 @@ async def reset_demo_state() -> dict[str, Any]:
         "tools": len(gateway.tools.list()),
     }
 
+
+@app.get("/security/sos", tags=["incidents"])
+async def get_security_sos_events() -> list[dict[str, Any]]:
+    return [
+        {
+            "event_type": e.event_type,
+            "incident_id": e.incident_id,
+            "agent_id": e.agent_id,
+            "reason_code": e.reason_code,
+            "severity": e.severity,
+            "created_at": e.created_at,
+            "task_id": e.task_id,
+            "trace_id": e.trace_id,
+            "details": e.details,
+        }
+        for e in gateway.incidents.get_sos_events()
+    ]
+
+
