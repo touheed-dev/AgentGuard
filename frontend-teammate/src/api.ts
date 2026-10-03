@@ -13,8 +13,6 @@ import {
   StageStatus,
   LedgerVerificationResult,
   ScenarioReplayResult,
-  DemoEnvironmentData,
-  DemoScenarioResult,
 } from './types';
 
 const API_BASE = '/api';
@@ -1005,32 +1003,6 @@ export const api = {
     const res = await fetch(`${API_BASE}/demo/reset`, { method: 'POST' });
     if (!res.ok) {
       throw new Error(`Demo reset failed with HTTP ${res.status}`);
-    }
-    return res.json();
-  },
-
-  /**
-   * Demo Environment / Agent Workspace Data
-   */
-  async getDemoEnvironment(): Promise<DemoEnvironmentData> {
-    const res = await fetch(`${API_BASE}/demo/environment`);
-    if (!res.ok) {
-      throw new Error(`Failed to fetch demo environment: HTTP ${res.status}`);
-    }
-    return res.json();
-  },
-
-  /**
-   * Run Demo Scenario (calls real backend /demo/scenarios/run endpoint)
-   */
-  async runDemoScenario(scenarioId: string, taskId: string = 'task-1'): Promise<DemoScenarioResult> {
-    const res = await fetch(`${API_BASE}/demo/scenarios/run`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ scenario_id: scenarioId, task_id: taskId }),
-    });
-    if (!res.ok) {
-      throw new Error(`Failed to run scenario ${scenarioId}: HTTP ${res.status}`);
     }
     return res.json();
   },

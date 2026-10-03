@@ -33,7 +33,6 @@ class EventType(StrEnum):
     ACTION_FAILED = "agent.action.failed"
     ACTION_CANCELLED = "agent.action.cancelled"
     ACTION_UNKNOWN_RESULT = "agent.action.unknown_result"
-    SECURITY_SOS = "security.sos"
 
 
 class ReasonCode(StrEnum):

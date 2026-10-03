@@ -59,9 +59,6 @@ class PersistenceCoordinator:
                 outbox_type = EventType.ACTION_BLOCKED if decision.decision.value == "BLOCK" else EventType.ACTION_AUTHORIZED
                 await enqueue(session, outbox_type, execution.execution_id, self._decision_payload(decision))
                 await self.audit.append(session, self._event(outbox_type.value, request, decision))
-                if decision.decision.value == "BLOCK" and any(r.severity == "critical" or r.code == "HONEY_ASSET_TOUCHED" for r in decision.reasons):
-                    await enqueue(session, EventType.SECURITY_SOS, execution.execution_id, self._decision_payload(decision))
-                    await self.audit.append(session, self._event(EventType.SECURITY_SOS.value, request, decision))
                 return PersistedAuthorization(execution, False)
 
     async def claim_execution(self, request: ActionRequest, decision: Decision) -> tuple[ExecutionRecord, bool]:

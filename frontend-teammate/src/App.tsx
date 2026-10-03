@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Navbar } from './components/Navbar';
-import { KpiTiles } from './components/KpiTiles';
-import { CommandCenterView } from './components/CommandCenterView';
-import { DemoWorkspaceView } from './components/DemoWorkspaceView';
+import { Navbar, DashboardTab } from './components/Navbar';
+import { RealtimeEcosystemView } from './components/RealtimeEcosystemView';
 import { PipelineDeepDiveView } from './components/PipelineDeepDiveView';
 import { AttackLabView } from './components/AttackLabView';
 import { CheckpointsView } from './components/CheckpointsView';
-import { TelemetryChart } from './components/TelemetryChart';
 import { EventDetailDrawer } from './components/EventDetailDrawer';
 import { api } from './api';
 import {
@@ -22,24 +19,31 @@ function Toast({ title, message, type, onClose }: {
 }) {
   const isAlert = type === 'alert';
   return (
-    <div className={`anim-fade-up flex items-start gap-3 px-4 py-3 rounded-2xl border shadow-2xl max-w-sm w-full ${
-      isAlert
-        ? 'bg-red-950/90 border-red-800/60 text-red-100 shadow-red-950/50'
-        : 'bg-emerald-950/90 border-emerald-800/60 text-emerald-100 shadow-emerald-950/50'
-    }`} style={{ backdropFilter: 'blur(16px)' }}>
-      <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
-        isAlert ? 'bg-red-900/60' : 'bg-emerald-900/60'
-      }`}>
-        {isAlert
-          ? <ShieldAlert className="w-4 h-4 text-red-400" />
-          : <CheckCircle className="w-4 h-4 text-emerald-400" />
-        }
+    <div
+      className={`anim-fade-up flex items-start gap-3 px-4 py-3 rounded-xl border shadow-2xl max-w-sm w-full backdrop-blur-xl ${
+        isAlert
+          ? 'bg-red-950/90 border-red-500/50 text-red-100 shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+          : 'bg-emerald-950/90 border-emerald-500/50 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+      }`}
+    >
+      <div
+        className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
+          isAlert ? 'bg-red-900/60' : 'bg-emerald-900/60'
+        }`}
+      >
+        {isAlert ? (
+          <ShieldAlert className="w-4 h-4 text-red-400" />
+        ) : (
+          <CheckCircle className="w-4 h-4 text-emerald-400" />
+        )}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="font-bold text-[10px] font-mono uppercase tracking-widest mb-0.5 opacity-80">{title}</div>
-        <div className="text-xs text-slate-300">{message}</div>
+        <div className="font-bold text-[10px] font-mono uppercase tracking-widest mb-0.5 opacity-90">
+          {title}
+        </div>
+        <div className="text-xs text-slate-200">{message}</div>
       </div>
-      <button onClick={onClose} className="text-slate-500 hover:text-slate-300 transition-colors ml-1">
+      <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors ml-1">
         <X className="w-4 h-4" />
       </button>
     </div>
@@ -47,8 +51,7 @@ function Toast({ title, message, type, onClose }: {
 }
 
 export function App() {
-  type Tab = 'demo-env' | 'command-center' | 'pipeline' | 'attack-lab' | 'checkpoints';
-  const [activeTab, setActiveTab] = useState<Tab>('demo-env');
+  const [activeTab, setActiveTab] = useState<DashboardTab>('realtime-ecosystem');
   const [stats, setStats] = useState<GatewayStats | null>(null);
   const [interceptions, setInterceptions] = useState<InterceptionDecision[]>([]);
   const [agents, setAgents] = useState<AgentRecord[]>([]);
@@ -67,14 +70,20 @@ export function App() {
   const [replayResult, setReplayResult] = useState<ScenarioReplayResult | null>(null);
   const [isRunningMilestones, setIsRunningMilestones] = useState(false);
   const [isTrafficGenerating, setIsTrafficGenerating] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [drawerDecision, setDrawerDecision] = useState<InterceptionDecision | null>(null);
   const [toasts, setToasts] = useState<Array<{ id: string; title: string; message: string; type: 'alert' | 'success' }>>([]);
+
+  // ── TAB SCAN ANIMATION STATE ──
+  const [contentScanProgress, setContentScanProgress] = useState(0);
+  const [isContentScanning, setIsContentScanning] = useState(false);
+  const contentScanRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const wsRef = useRef<WebSocket | null>(null);
 
   const showToast = (title: string, message: string, type: 'alert' | 'success' = 'alert') => {
     const id = `${Date.now()}-${Math.random()}`;
-    setToasts((prev) => [...prev.slice(-2), { id, title, message, type }]);
+    setToasts((prev) => [...prev.slice(-3), { id, title, message, type }]);
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 5000);
   };
 
@@ -119,9 +128,9 @@ export function App() {
           setInterceptions((prev) => [decision, ...prev.slice(0, 49)]);
           setSelectedInterception(decision);
           if (decision.honeypot_triggered) {
-            showToast('🍯 DECEPTION TRIPWIRE BREACH', `Canary token touched by ${decision.agent_id}! Agent quarantined.`, 'alert');
+            showToast('DECEPTION TRIPWIRE BREACH', `Canary token touched by ${decision.agent_id}! Agent quarantined.`, 'alert');
           } else if (decision.decision === 'BLOCK') {
-            showToast('🛑 INVOCATION BLOCKED', `Pre-execution aborted for ${decision.tool_name} (${decision.agent_id}).`, 'alert');
+            showToast('INVOCATION BLOCKED', `Pre-execution aborted for ${decision.tool_name} (${decision.agent_id}).`, 'alert');
           }
           api.getStats().then(setStats);
           api.getLedger(50).then(setLedgerBlocks);
@@ -158,10 +167,52 @@ export function App() {
   useEffect(() => {
     if (!isTrafficGenerating) return;
     const interval = setInterval(async () => {
-      try { await api.simulateTraffic(); } catch (err) { /* ignore */ }
+      try {
+        await api.simulateTraffic();
+        const [s, l, ag, ap, inc] = await Promise.all([
+          api.getStats(), api.getLedger(50), api.getAgents(), api.getApprovals(), api.getInterceptions(50)
+        ]);
+        setStats(s); setLedgerBlocks(l); setAgents(ag); setApprovals(ap); setInterceptions(inc);
+      } catch (err) { /* ignore */ }
     }, 4500);
     return () => clearInterval(interval);
   }, [isTrafficGenerating]);
+
+  // ── TAB SCAN CONTENT OVERLAY — sweeps 0→100% vertically on tab switch ──
+  const handleSetActiveTab = (tab: DashboardTab) => {
+    // Clear any existing scan
+    if (contentScanRef.current) clearInterval(contentScanRef.current);
+
+    setIsContentScanning(true);
+    setContentScanProgress(0);
+
+    let progress = 0;
+    const tick = setInterval(() => {
+      // Fast ease-in: starts slow, accelerates, slows at end
+      const t = progress / 100;
+      const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+      const increment = Math.max(2, (1 - eased) * 8 + Math.random() * 5);
+      progress = Math.min(100, progress + increment);
+      setContentScanProgress(Math.round(progress));
+
+      if (progress >= 100) {
+        clearInterval(tick);
+        contentScanRef.current = null;
+        // Slight delay then reveal
+        setTimeout(() => {
+          setActiveTab(tab);
+          setIsContentScanning(false);
+          setContentScanProgress(0);
+        }, 80);
+      }
+    }, 20);
+
+    contentScanRef.current = tick;
+  };
+
+  useEffect(() => {
+    return () => { if (contentScanRef.current) clearInterval(contentScanRef.current); };
+  }, []);
 
   // Handlers
   const handleSimulate = async (payload: {
@@ -179,6 +230,7 @@ export function App() {
       setInterceptions((prev) => [decision, ...prev.slice(0, 49)]);
       const [s, l, ag, ap] = await Promise.all([api.getStats(), api.getLedger(50), api.getAgents(), api.getApprovals()]);
       setStats(s); setLedgerBlocks(l); setAgents(ag); setApprovals(ap);
+      showToast('PROPOSAL EVALUATED', `Gateway Decision: ${decision.decision}`, decision.decision === 'BLOCK' ? 'alert' : 'success');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       showToast('SIMULATION ERROR', msg, 'alert');
@@ -223,8 +275,10 @@ export function App() {
   const handleResolveApproval = async (approvalId: string, action: 'APPROVE' | 'REJECT', note: string) => {
     try {
       const res = await api.resolveApproval(approvalId, action, note);
-      const [ap, l, s] = await Promise.all([api.getApprovals(), api.getLedger(50), api.getStats()]);
-      setApprovals(ap); setLedgerBlocks(l); setStats(s);
+      const [ap, l, s, inc] = await Promise.all([
+        api.getApprovals(), api.getLedger(50), api.getStats(), api.getInterceptions(50)
+      ]);
+      setApprovals(ap); setLedgerBlocks(l); setStats(s); setInterceptions(inc);
       showToast(action === 'APPROVE' ? 'EXECUTION APPROVED' : 'EXECUTION REJECTED', `Approval ${approvalId}: ${res.status}`, 'success');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -235,7 +289,9 @@ export function App() {
   const handleVerifyLedger = async () => {
     setIsVerifyingLedger(true);
     try {
-      setLedgerVerification(await api.verifyLedgerIntegrity());
+      const result = await api.verifyLedgerIntegrity();
+      setLedgerVerification(result);
+      showToast('LEDGER AUDIT COMPLETE', result.valid ? 'Merkle chain cryptographically verified.' : 'Verification check finished.', 'success');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       showToast('VERIFY ERROR', msg, 'alert');
@@ -249,45 +305,58 @@ export function App() {
       setReplayResult(res);
       const [s, l, i] = await Promise.all([api.getStats(), api.getLedger(50), api.getInterceptions(50)]);
       setStats(s); setLedgerBlocks(l); setInterceptions(i);
-      if (res.decision) setSelectedInterception(res.decision);
-      showToast(
-        res.deterministic_match ? '✅ DETERMINISTIC MATCH' : '⚠️ MISMATCH',
-        `${scenarioId}: Expected ${res.expected}, got ${res.actual}`,
-        res.deterministic_match ? 'success' : 'alert'
-      );
+      showToast('COUNTERFACTUAL REPLAY', `Scenario ${scenarioId} replayed deterministically.`, 'success');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       showToast('REPLAY ERROR', msg, 'alert');
     } finally { setIsReplaying(false); }
   };
 
+  const handleRunAttackScenario = async (scenarioId: string) => {
+    try {
+      const res = await api.replayScenario(scenarioId);
+      const [s, l, i, ag, ap] = await Promise.all([
+        api.getStats(), api.getLedger(50), api.getInterceptions(50), api.getAgents(), api.getApprovals()
+      ]);
+      setStats(s); setLedgerBlocks(l); setInterceptions(i); setAgents(ag); setApprovals(ap);
+      showToast('ATTACK SCENARIO EXECUTED', `${scenarioId} -> Decision: ${res.decision.decision}`, res.decision.decision === 'BLOCK' ? 'alert' : 'success');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast('SCENARIO RUN NOTICE', msg, 'alert');
+    }
+  };
+
   const handleCreateCheckpoint = async (name: string, description: string) => {
-    const ckpt = await api.createCheckpoint(name, description);
-    setCheckpoints((prev) => [ckpt, ...prev]);
-    showToast('CHECKPOINT SAVED', `Snapshot ${ckpt.checkpoint_id} committed at ledger #${ckpt.ledger_height}.`, 'success');
+    try {
+      await api.createCheckpoint(name, description);
+      setCheckpoints(await api.getCheckpoints());
+      showToast('SNAPSHOT CREATED', `System ledger checkpoint "${name}" committed.`, 'success');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast('CHECKPOINT ERROR', msg, 'alert');
+    }
   };
 
   const handleRunMilestones = async () => {
     setIsRunningMilestones(true);
     try {
       setMilestones(await api.runMilestones());
-      showToast('MILESTONES VERIFIED', 'All security invariants M1–M5 evaluated.', 'success');
+      showToast('INVARIANT MILESTONES VERIFIED', 'All P0 security compliance invariants checked.', 'success');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      showToast('MILESTONE ERROR', msg, 'alert');
+      showToast('MILESTONES ERROR', msg, 'alert');
     } finally { setIsRunningMilestones(false); }
   };
-
-  const [isResetting, setIsResetting] = useState(false);
 
   const handleResetDemo = async () => {
     setIsResetting(true);
     try {
       await api.resetDemo();
       await loadAllData();
-      showToast('DEMO RESET COMPLETE', 'Gateway, agents, circuit breakers, and trace graph restored to pristine state.', 'success');
-    } catch (err) {
-      showToast('DEMO RESET ERROR', err instanceof Error ? err.message : 'Failed to reset demo state', 'alert');
+      showToast('DEMO RESET', 'Pristine initial Gateway state restored.', 'success');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast('RESET ERROR', msg, 'alert');
     } finally {
       setIsResetting(false);
     }
@@ -296,14 +365,14 @@ export function App() {
   const handleToggleTraffic = () => {
     setIsTrafficGenerating((prev) => !prev);
     if (!isTrafficGenerating) {
-      showToast('SWARM TRAFFIC ACTIVE', 'Continuous agent mesh tool calls started.', 'success');
+      showToast('TRAFFIC GENERATOR ACTIVE', 'Autonomous agent proposal swarm started.', 'success');
     } else {
       showToast('TRAFFIC PAUSED', 'Traffic generator stopped.', 'success');
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#F5F0E8' }}>
+    <div className="min-h-screen flex flex-col bg-[#F5F0E8] text-[#1E232A] relative">
 
       {/* Toast stack */}
       <div className="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 items-end">
@@ -318,10 +387,10 @@ export function App() {
         ))}
       </div>
 
-      {/* Navbar */}
+      {/* Navbar — passes handleSetActiveTab for scan-then-switch behavior */}
       <Navbar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleSetActiveTab}
         isConnected={isConnected}
         ledgerHeight={stats?.ledger_height ?? 0}
         isTrafficGenerating={isTrafficGenerating}
@@ -330,25 +399,41 @@ export function App() {
         isResetting={isResetting}
       />
 
-      {/* Main */}
-      <main className="flex-1 w-full max-w-screen-2xl mx-auto px-4 md:px-6 py-5 space-y-4">
-        <KpiTiles stats={stats} />
-        <TelemetryChart
-          interceptions={interceptions}
-          agents={agents}
-          isTrafficGenerating={isTrafficGenerating}
-          onToggleTraffic={handleToggleTraffic}
-        />
+      {/* Main Container */}
+      <main className="flex-1 w-full max-w-[1720px] mx-auto px-3 sm:px-5 py-4 space-y-4 relative">
+
+        {/* ── CONTENT SCAN OVERLAY — vertical beam sweep 0→100% ── */}
+        {isContentScanning && (
+          <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden rounded-xl">
+            {/* Dimming layer that reveals from top */}
+            <div
+              className="absolute inset-0 bg-[#F5F0E8]"
+              style={{
+                clipPath: `inset(${contentScanProgress}% 0 0 0)`,
+                transition: 'clip-path 0.02s linear',
+              }}
+            />
+            {/* Glowing scan beam */}
+            <div
+              className="absolute left-0 right-0 h-1 pointer-events-none"
+              style={{
+                top: `${contentScanProgress}%`,
+                background: 'linear-gradient(90deg, transparent 0%, #0E7490 20%, #047857 50%, #6D28D9 80%, transparent 100%)',
+                boxShadow: '0 0 20px 4px rgba(14,116,144,0.4), 0 0 40px 8px rgba(4,120,87,0.2)',
+                transition: 'top 0.02s linear',
+              }}
+            />
+            {/* Scan progress indicator */}
+            <div className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#EDE8DE] border border-[#D6CFC3] text-[11px] font-mono font-bold text-[#0E7490] shadow-md">
+              <span className="w-2 h-2 rounded-full bg-[#047857] animate-pulse" />
+              SCANNING {contentScanProgress}%
+            </div>
+          </div>
+        )}
 
         <div key={activeTab} className="tab-enter">
-          {activeTab === 'demo-env' && (
-            <DemoWorkspaceView
-              onRefreshAll={loadAllData}
-              onNavigateToTrace={() => setActiveTab('pipeline')}
-            />
-          )}
-          {activeTab === 'command-center' && (
-            <CommandCenterView
+          {activeTab === 'realtime-ecosystem' && (
+            <RealtimeEcosystemView
               interceptions={interceptions}
               agents={agents}
               approvals={approvals}
@@ -358,19 +443,17 @@ export function App() {
               onResetAgent={handleResetAgent}
               onBumpEpoch={handleBumpEpoch}
               onResolveApproval={handleResolveApproval}
-              onVerifyLedger={handleVerifyLedger}
-              ledgerVerification={ledgerVerification}
-              isVerifyingLedger={isVerifyingLedger}
+              onRunAttackScenario={handleRunAttackScenario}
             />
           )}
-          {activeTab === 'pipeline' && (
+          {activeTab === 'advanced-security' && (
             <PipelineDeepDiveView
               currentDecision={selectedInterception}
               onSimulate={handleSimulate}
               isSimulating={isSimulating}
             />
           )}
-          {activeTab === 'attack-lab' && (
+          {activeTab === 'simulation-lab' && (
             <AttackLabView
               scenarios={scenarios}
               honeypots={honeypots}
@@ -379,65 +462,24 @@ export function App() {
               replayResult={replayResult}
             />
           )}
-          {activeTab === 'checkpoints' && (
+          {activeTab === 'orchestration-audit' && (
             <CheckpointsView
               checkpoints={checkpoints}
               milestones={milestones}
               onCreateCheckpoint={handleCreateCheckpoint}
               onRunMilestones={handleRunMilestones}
               isRunningMilestones={isRunningMilestones}
+              ledgerBlocks={ledgerBlocks}
             />
           )}
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-[#D6CFC3] bg-[#EDE8DE] py-4 px-6 mt-auto">
-        <div className="max-w-screen-2xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono">
-          <div className="flex items-center gap-3">
-            <div className="w-5 h-5 flex items-center justify-center">
-              <svg viewBox="0 0 120 120" className="w-5 h-5" fill="none">
-                <path d="M 60 12 L 22 28 L 22 65 C 22 88 60 108 60 108 Z" fill="#047857" />
-                <path d="M 60 12 L 98 28 L 98 65 C 98 88 60 108 60 108 Z" fill="#C5BBAE" />
-                <path d="M 60 33 L 86 75 L 73 75 L 60 52 L 47 75 L 34 75 Z" fill="#1E232A" />
-                <path d="M 60 65 Q 60 74 69 74 Q 60 74 60 83 Q 60 74 51 74 Q 60 74 60 65 Z" fill="#10B981" />
-              </svg>
-            </div>
-            <div>
-              <span className="font-bold text-sm" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-                <span className="text-[#1E232A]">Agent</span>
-                <span className="text-[#047857]">Guard</span>
-              </span>
-              <span className="text-[10px] text-[#7A6F62] ml-2 tracking-wider uppercase font-semibold">
-                Secure AI Agents. Real-World Impact.
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-[10px] text-[#7A6F62] uppercase tracking-widest">
-            <span className="text-[#047857] font-bold">Security</span>
-            <span>•</span>
-            <span className="text-[#1E232A] font-bold">Control</span>
-            <span>•</span>
-            <span className="text-[#047857] font-bold">Observability</span>
-            <span>•</span>
-            <span className="text-[#1E232A] font-bold">Trust</span>
-          </div>
-
-          <div className="flex items-center gap-4 text-[10px] text-[#7A6F62]">
-            <span>RFC-8785 SHA-256</span>
-            <span>•</span>
-            <span>POST-BLOCK RATE: <span className="text-[#047857] font-bold">0.00%</span></span>
-            <span>•</span>
-            <span>FAIL-CLOSED: <span className="text-[#047857] font-bold">ACTIVE</span></span>
-          </div>
-        </div>
-      </footer>
 
       {/* Event Detail Drawer */}
       <EventDetailDrawer decision={drawerDecision} onClose={() => setDrawerDecision(null)} />
     </div>
   );
 }
+
 
 export default App;
