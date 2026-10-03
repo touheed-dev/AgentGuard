@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Shield, Activity, Cpu, GitBranch, ShieldCheck, RotateCcw,
   Play, Square, Zap, Lock, Layers, Radar, Terminal, TrendingUp,
-  BarChart2, Fingerprint, Gauge
+  BarChart2, Fingerprint, Gauge, Globe
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 
-export type DashboardTab = 'realtime-ecosystem' | 'runtime-integrity' | 'advanced-security' | 'orchestration-audit' | 'simulation-lab';
+export type DashboardTab = 'realtime-ecosystem' | 'runtime-integrity' | 'advanced-security' | 'threat-intel-benchmark' | 'orchestration-audit' | 'simulation-lab';
 
 interface NavbarProps {
   activeTab: DashboardTab;
@@ -114,6 +114,16 @@ export const Navbar: React.FC<NavbarProps> = ({
       badgePulse: false,
       badgeColor: 'bg-sky-100 text-sky-800 border-sky-300',
       accentColor: '#0E7490',
+    },
+    {
+      id: 'threat-intel-benchmark',
+      label: 'Live Threat Intel & Benchmark',
+      sublabel: '7 Real Feeds & Live Engine',
+      icon: Globe,
+      badge: 'LIVE FEEDS',
+      badgePulse: true,
+      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      accentColor: '#047857',
     },
     {
       id: 'orchestration-audit',

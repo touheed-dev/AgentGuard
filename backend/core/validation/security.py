@@ -33,7 +33,7 @@ class ParameterValidator:
                 normalized = decoded
             if ".." in normalized.replace("\\", "/").split("/"):
                 reasons.append((ReasonCode.PATH_TRAVERSAL, f"Argument {key} contains path traversal."))
-            if any(marker in normalized.lower() for marker in ("/etc/passwd", ".env", "credentials", "secret", "id_rsa")):
+            if any(marker in normalized.lower() for marker in ("/etc/passwd", "/etc/shadow", "shadow", ".env", "credentials", "secret", "id_rsa")):
                 reasons.append((ReasonCode.SENSITIVE_RESOURCE, f"Argument {key} targets a protected resource."))
             if key in tool.command_fields and any(ord(character) < 32 for character in normalized):
                 reasons.append((ReasonCode.SCHEMA_INVALID, "Control characters are not permitted in commands."))

@@ -17,6 +17,7 @@ from backend.core.identity.registry import AgentRegistry
 from backend.core.identity.service import IdentityService
 from backend.core.risk.service import RiskService
 from backend.core.task_consistency.service import TaskConsistencyService
+from backend.core.threat_intel.service import ThreatIntelService
 from backend.core.tools.registry import ToolRegistry
 from backend.core.validation.schema import validate_object
 from backend.core.validation.security import ParameterResult, ParameterValidator
@@ -49,6 +50,7 @@ class Gateway:
         incidents: IncidentService | None = None,
         approvals: ApprovalService | None = None,
         communication: CommunicationService | None = None,
+        threat_intel: ThreatIntelService | None = None,
     ) -> None:
         self.identity = identity
         self.agents = agents
@@ -65,6 +67,7 @@ class Gateway:
         self.incidents = incidents or IncidentService()
         self.approvals = approvals or ApprovalService()
         self.communication = communication or CommunicationService(agents=agents)
+        self.threat_intel = threat_intel or ThreatIntelService()
         self._executed_ids: set[str] = set()
         self._authorized_fingerprints: dict[str, str] = {}
         self._claimed_ids: set[str] = set()
@@ -178,7 +181,8 @@ class Gateway:
 
         parameters = self.parameter_validator.validate(arguments, tool)
         consistency = self.task_consistency.evaluate(task_id, tool_name)
-        risk = self.risk.assess(tool, parameters, consistency)
+        enriched_indicators = self.threat_intel.enrich_action(tool_name, arguments)
+        risk = self.risk.assess(tool, parameters, consistency, threat_intel_indicators=enriched_indicators)
         decision = self.decision_service.decide(
             agent_id=agent_id,
             tool_name=tool_name,

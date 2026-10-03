@@ -15,6 +15,12 @@ import {
   ScenarioReplayResult,
   DemoEnvironmentData,
   DemoScenarioResult,
+  ProviderHealthItem,
+  EnrichedIndicatorItem,
+  BenchmarkScenarioItem,
+  BenchmarkScenarioExecutionResult,
+  LiveBenchmarkMetrics,
+  BenchmarkEventItem,
 } from './types';
 
 const API_BASE = '/api';
@@ -1129,6 +1135,78 @@ export const api = {
         output_preview: '{"status": "ok", "report_title": "Q3 Distributed Swarm Security Matrix", "verified_entries": 42}'
       };
     }
+    return res.json();
+  },
+
+  // ── Live Threat Intelligence APIs ──
+  getThreatIntelProviders: async (): Promise<ProviderHealthItem[]> => {
+    const res = await fetch(`${API_BASE}/threat-intel/providers`);
+    if (!res.ok) throw new Error('Failed to fetch threat intel providers');
+    return res.json();
+  },
+
+  lookupThreatIndicator: async (indicator: string, type?: string, forceRefresh?: boolean): Promise<EnrichedIndicatorItem> => {
+    const res = await fetch(`${API_BASE}/threat-intel/lookup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ indicator, type: type || null, force_refresh: !!forceRefresh }),
+    });
+    if (!res.ok) throw new Error('Failed to lookup indicator');
+    return res.json();
+  },
+
+  getRecentIndicators: async (limit = 50): Promise<EnrichedIndicatorItem[]> => {
+    const res = await fetch(`${API_BASE}/threat-intel/indicators?limit=${limit}`);
+    if (!res.ok) throw new Error('Failed to fetch recent indicators');
+    return res.json();
+  },
+
+  getThreatIntelStats: async (): Promise<Record<string, unknown>> => {
+    const res = await fetch(`${API_BASE}/threat-intel/stats`);
+    if (!res.ok) throw new Error('Failed to fetch threat intel stats');
+    return res.json();
+  },
+
+  // ── Real-Time Benchmark APIs ──
+  getLiveBenchmarkMetrics: async (): Promise<LiveBenchmarkMetrics> => {
+    const res = await fetch(`${API_BASE}/benchmark/live`);
+    if (!res.ok) throw new Error('Failed to fetch live benchmark metrics');
+    return res.json();
+  },
+
+  getRecentBenchmarkEvents: async (limit = 50): Promise<BenchmarkEventItem[]> => {
+    const res = await fetch(`${API_BASE}/benchmark/events?limit=${limit}`);
+    if (!res.ok) throw new Error('Failed to fetch recent benchmark events');
+    return res.json();
+  },
+
+  getBenchmarkScenarios: async (): Promise<BenchmarkScenarioItem[]> => {
+    const res = await fetch(`${API_BASE}/benchmark/scenarios`);
+    if (!res.ok) throw new Error('Failed to fetch benchmark scenarios');
+    return res.json();
+  },
+
+  runBenchmarkScenario: async (scenarioId: string): Promise<BenchmarkScenarioExecutionResult> => {
+    const res = await fetch(`${API_BASE}/benchmark/run-scenario/${scenarioId}`, {
+      method: 'POST',
+    });
+    if (!res.ok) throw new Error('Failed to run benchmark scenario');
+    return res.json();
+  },
+
+  runBenchmarkSuite: async (iterations = 10, scenarioIds?: string[]): Promise<Record<string, unknown>> => {
+    const res = await fetch(`${API_BASE}/benchmark/run-suite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ iterations, scenario_ids: scenarioIds || null }),
+    });
+    if (!res.ok) throw new Error('Failed to run benchmark suite');
+    return res.json();
+  },
+
+  getBenchmarkHistory: async (limit = 10): Promise<Array<Record<string, unknown>>> => {
+    const res = await fetch(`${API_BASE}/benchmark/history?limit=${limit}`);
+    if (!res.ok) throw new Error('Failed to fetch benchmark history');
     return res.json();
   },
 };

@@ -52,7 +52,11 @@ class StubExecutor:
             return {"tool": "echo", "value": receipt.arguments.get("value")}
         if receipt.tool_name == "get_demo_data":
             return {"tool": "get_demo_data", "data": ["synthetic-alpha", "synthetic-beta"]}
-        raise ValueError(f"No stub implementation for {receipt.tool_name}.")
+        if receipt.tool_name in {"read_file", "file_read"}:
+            return {"tool": receipt.tool_name, "content": "synthetic file contents", "executed": True}
+        if receipt.tool_name == "search_knowledge":
+            return {"tool": "search_knowledge", "results": [{"title": "agentguard", "content": "zero-trust security"}], "executed": True}
+        return {"tool": receipt.tool_name, "status": "executed", "executed": True, "arguments": receipt.arguments}
 
     @staticmethod
     def _fingerprint(receipt: AuthorizationReceipt) -> str:

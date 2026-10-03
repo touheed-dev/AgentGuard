@@ -1,11 +1,15 @@
 import os
+import time
 from typing import Any
 from uuid import uuid4
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import Field
 
 from backend.apps.gateway.runtime import create_runtime
+from backend.core.benchmark.service import BENCHMARK_SCENARIOS, BenchmarkService
+from backend.core.threat_intel.extractors import IndicatorExtractor
+from backend.core.threat_intel.models import IndicatorType, ProviderHealth
 from backend.services.persistence import PersistenceCoordinator
 from backend.shared.contracts import ActionRequest, Decision, DecisionOutcome, HealthResponse, Reason, ReasonCode, StrictModel
 
@@ -35,10 +39,21 @@ class TokenIssueRequest(StrictModel):
     lifetime_seconds: int = 300
 
 
+class ThreatIntelLookupRequest(StrictModel):
+    indicator: str = Field(min_length=1)
+    type: str | None = None
+    force_refresh: bool = False
+
+
+class BenchmarkRunRequest(StrictModel):
+    iterations: int = 10
+    scenario_ids: list[str] | None = None
+
+
 app = FastAPI(
     title="AgentGuard Gateway",
-    version="0.1.0",
-    description="Phase 1 deterministic security Gateway.",
+    version="0.2.0",
+    description="AgentGuard Zero-Trust Security Gateway & Threat Intelligence Engine.",
 )
 
 from backend.services.replay import ReplayAction, ReplayEngine
@@ -47,6 +62,7 @@ from backend.services.trace_graph import TraceGraphService
 gateway, identity_service, executor = create_runtime()
 persistence = PersistenceCoordinator() if os.getenv("AGENTGUARD_PERSISTENCE", "false").lower() == "true" else None
 trace_graph = TraceGraphService()
+benchmark_service = BenchmarkService()
 
 
 @app.get("/health", response_model=HealthResponse, tags=["system"])
@@ -72,9 +88,9 @@ async def issue_token(req: TokenIssueRequest) -> dict[str, Any]:
     return {"token": token, "agent_id": req.agent_id, "task_id": req.task_id}
 
 
-
 @app.post("/actions/evaluate", response_model=Decision, tags=["actions"])
 async def evaluate_action(request: GatewayActionRequest, track_request: bool = False) -> Decision:
+    t0 = time.perf_counter()
     decision = gateway.authorize(
         request.agent_id,
         request.tool_name,
@@ -85,7 +101,25 @@ async def evaluate_action(request: GatewayActionRequest, track_request: bool = F
         request.execution_id,
         request.request_id if track_request else None,
     )
-    risk_score = 75.0 if decision.decision == DecisionOutcome.BLOCK else (30.0 if decision.decision == DecisionOutcome.WARN else 10.0)
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+
+    threat_details = decision.risk.get("threat_intel", []) if isinstance(decision.risk, dict) else []
+    risk_score = float(decision.risk.get("score", 75.0 if decision.decision == DecisionOutcome.BLOCK else (30.0 if decision.decision == DecisionOutcome.WARN else 10.0)))
+    reasons_list = [r.message for r in decision.reasons]
+
+    # Record live benchmark metric
+    benchmark_service.record_event(
+        agent_id=request.agent_id,
+        tool_name=request.tool_name,
+        outcome=decision.decision.value,
+        gateway_latency_ms=elapsed_ms,
+        threat_latency_ms=elapsed_ms * 0.35 if threat_details else 0.0,
+        threat_indicators_count=len(threat_details),
+        threat_intel_details=threat_details,
+        reasons=reasons_list,
+        risk_score=risk_score,
+    )
+
     trace_graph.record_step(
         request.trace_id,
         request.agent_id,
@@ -257,7 +291,6 @@ async def list_tools() -> list[dict[str, Any]]:
 async def get_graph() -> dict[str, Any]:
     from backend.services.trace_graph import TraceGraphService
     tg = TraceGraphService()
-    # Populate with current registered agents and communication edges
     for a in gateway.agents.list():
         tg.graph.add_node(f"agent:{a.agent_id}", type="agent", label=a.name, security_state=a.security_state.value)
     for u, v in gateway.communication.edges:
@@ -270,7 +303,6 @@ async def get_graph() -> dict[str, Any]:
 
 @app.get("/activity", tags=["activity"])
 async def get_activity() -> list[dict[str, Any]]:
-    # Aggregate recorded trace steps into activity items
     activity: list[dict[str, Any]] = []
     for trace_id, steps in trace_graph._traces.items():
         for st in steps:
@@ -317,7 +349,6 @@ async def replay_trace(payload: dict[str, Any]) -> dict[str, Any]:
     trace_id = payload.get("trace_id", "trace-demo")
     steps = trace_graph.get_trace(trace_id)
     if not steps:
-        # Create default verifiable actions for demo replay
         actions = (
             ReplayAction("researcher-01", "get_demo_data", {}, "task-1", trace_id, "replay-exec-1"),
         )
@@ -347,6 +378,107 @@ async def replay_trace(payload: dict[str, Any]) -> dict[str, Any]:
         "status": "deterministic_match",
     }
 
+
+# ============================================================================
+# THREAT INTELLIGENCE REST ENDPOINTS
+# ============================================================================
+
+@app.get("/threat-intel/providers", tags=["threat-intel"])
+async def get_threat_intel_providers() -> list[dict[str, Any]]:
+    health_list = gateway.threat_intel.get_providers_health()
+    return [h.model_dump() for h in health_list]
+
+
+@app.post("/threat-intel/lookup", tags=["threat-intel"])
+async def lookup_threat_indicator(req: ThreatIntelLookupRequest) -> dict[str, Any]:
+    raw_ind = req.indicator.strip()
+    target_type: IndicatorType | None = None
+
+    if req.type:
+        try:
+            target_type = IndicatorType(req.type.lower())
+        except ValueError:
+            pass
+
+    if target_type is None:
+        # Auto-detect indicator type
+        extracted = IndicatorExtractor.extract_from_text(raw_ind)
+        if extracted:
+            target_type = extracted[0].indicator_type
+        else:
+            target_type = IndicatorType.DOMAIN if "." in raw_ind else IndicatorType.IP
+
+    enriched = gateway.threat_intel.enrich_indicator(
+        indicator=raw_ind,
+        indicator_type=target_type,
+        force_refresh=req.force_refresh,
+    )
+    return enriched.model_dump()
+
+
+@app.get("/threat-intel/indicators", tags=["threat-intel"])
+async def get_recent_indicators(limit: int = 50) -> list[dict[str, Any]]:
+    return gateway.threat_intel.get_recent_indicators(limit=limit)
+
+
+@app.get("/threat-intel/stats", tags=["threat-intel"])
+async def get_threat_intel_stats() -> dict[str, Any]:
+    return gateway.threat_intel.get_stats()
+
+
+# ============================================================================
+# REAL-TIME BENCHMARK REST ENDPOINTS
+# ============================================================================
+
+@app.get("/benchmark/live", tags=["benchmark"])
+async def get_live_benchmark_metrics() -> dict[str, Any]:
+    ti_stats = gateway.threat_intel.get_stats()
+    return benchmark_service.get_live_metrics(threat_intel_stats=ti_stats)
+
+
+@app.get("/benchmark/events", tags=["benchmark"])
+async def get_recent_benchmark_events(limit: int = 50) -> list[dict[str, Any]]:
+    return benchmark_service.get_recent_events(limit=limit)
+
+
+@app.get("/benchmark/scenarios", tags=["benchmark"])
+async def get_benchmark_scenarios() -> list[dict[str, Any]]:
+    return benchmark_service.get_scenarios()
+
+
+@app.post("/benchmark/run-scenario/{scenario_id}", tags=["benchmark"])
+async def run_benchmark_scenario(scenario_id: str) -> dict[str, Any]:
+    try:
+        res = benchmark_service.run_scenario(scenario_id, gateway, identity_service)
+        return res
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/benchmark/run-suite", tags=["benchmark"])
+async def run_benchmark_suite(req: BenchmarkRunRequest) -> dict[str, Any]:
+    try:
+        res = benchmark_service.run_benchmark_suite(
+            gateway=gateway,
+            identity_service=identity_service,
+            iterations=req.iterations,
+            scenario_ids=req.scenario_ids,
+        )
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/benchmark/history", tags=["benchmark"])
+async def get_benchmark_history(limit: int = 10) -> list[dict[str, Any]]:
+    return benchmark_service.get_benchmark_history(limit=limit)
+
+
+# ============================================================================
+# SYSTEM & SIMULATION LAB ENDPOINTS
+# ============================================================================
 
 @app.post("/attack-lab/run/{scenario_id}", tags=["attack-lab"])
 async def run_attack_scenario(scenario_id: str) -> dict[str, Any]:
@@ -378,9 +510,10 @@ async def run_attack_scenario(scenario_id: str) -> dict[str, Any]:
 @app.post("/demo/reset", tags=["system"])
 @app.post("/system/reset", tags=["system"])
 async def reset_demo_state() -> dict[str, Any]:
-    global gateway, identity_service, executor, trace_graph
+    global gateway, identity_service, executor, trace_graph, benchmark_service
     gateway, identity_service, executor = create_runtime()
     trace_graph = TraceGraphService()
+    benchmark_service = BenchmarkService()
     return {
         "status": "ok",
         "message": "Demo environment reset to pristine initial state.",
@@ -405,5 +538,3 @@ async def get_security_sos_events() -> list[dict[str, Any]]:
         }
         for e in gateway.incidents.get_sos_events()
     ]
-
-

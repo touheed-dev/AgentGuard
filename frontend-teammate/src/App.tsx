@@ -5,6 +5,7 @@ import { PipelineDeepDiveView } from './components/PipelineDeepDiveView';
 import { AttackLabView } from './components/AttackLabView';
 import { CheckpointsView } from './components/CheckpointsView';
 import { RuntimeIntegrityView } from './components/RuntimeIntegrityView';
+import { ThreatIntelBenchmarkView } from './components/ThreatIntelBenchmarkView';
 import { EventDetailDrawer } from './components/EventDetailDrawer';
 import { api } from './api';
 import {
@@ -453,6 +454,9 @@ export function App() {
               onSimulate={handleSimulate}
               isSimulating={isSimulating}
             />
+          )}
+          {activeTab === 'threat-intel-benchmark' && (
+            <ThreatIntelBenchmarkView />
           )}
           {activeTab === 'simulation-lab' && (
             <AttackLabView

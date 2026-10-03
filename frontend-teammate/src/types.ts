@@ -228,3 +228,123 @@ export interface DemoScenarioResult {
   output_preview?: string | null;
 }
 
+// ── Real-Time Threat Intelligence & Benchmark Contracts ──
+
+export interface ProviderHealthItem {
+  provider_name: string;
+  display_name: string;
+  status: 'online' | 'no_key' | 'degraded' | 'offline';
+  has_api_key: boolean;
+  total_queries: number;
+  successful_queries: number;
+  failed_queries: number;
+  avg_latency_ms: number;
+  last_queried_at?: string | null;
+  last_error?: string | null;
+  supported_types: string[];
+  is_free_tier: boolean;
+  rate_limit_info?: string | null;
+}
+
+export interface ProviderResultItem {
+  provider_name: string;
+  indicator: string;
+  indicator_type: string;
+  reputation: 'benign' | 'suspicious' | 'malicious' | 'unknown';
+  risk_score: number;
+  confidence: number;
+  details: Record<string, unknown>;
+  raw_data?: Record<string, unknown> | null;
+  source_url?: string | null;
+  queried_at: string;
+  latency_ms: number;
+  error?: string | null;
+}
+
+export interface EnrichedIndicatorItem {
+  indicator: string;
+  indicator_type: string;
+  overall_reputation: 'benign' | 'suspicious' | 'malicious' | 'unknown';
+  overall_risk_score: number;
+  max_confidence: number;
+  provider_results: ProviderResultItem[];
+  primary_provider?: string | null;
+  cached: boolean;
+  tags: string[];
+  summary: string;
+  extracted_from?: string | null;
+  timestamp?: string;
+}
+
+export interface BenchmarkScenarioItem {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  agent_id: string;
+  tool_name: string;
+  arguments: Record<string, unknown>;
+  expected_outcome: string;
+  threat_profile: string;
+}
+
+export interface BenchmarkScenarioExecutionResult {
+  scenario: BenchmarkScenarioItem;
+  actual_decision: string;
+  expected_decision: string;
+  decision_matched: boolean;
+  latency_ms: number;
+  risk_score: number;
+  reasons: string[];
+  threat_details: Array<Record<string, unknown>>;
+  executed_at: string;
+}
+
+export interface LatencyPercentiles {
+  avg: number;
+  min: number;
+  max: number;
+  p50: number;
+  p95: number;
+  p99: number;
+}
+
+export interface LiveBenchmarkMetrics {
+  timestamp: string;
+  uptime_seconds: number;
+  total_events_evaluated: number;
+  decisions: {
+    ALLOW: number;
+    WARN: number;
+    REQUIRE_APPROVAL: number;
+    BLOCK: number;
+  };
+  gateway_latency_ms: LatencyPercentiles;
+  threat_intel_latency_ms: LatencyPercentiles;
+  throughput_events_per_sec: number;
+  threat_intel_stats: {
+    total_indicators_enriched: number;
+    total_lookups?: number;
+    cache_hits: number;
+    cache_misses: number;
+    cache_hit_rate_pct: number;
+    active_providers_count: number;
+    total_providers: number;
+  };
+  active_benchmark_running: boolean;
+  current_benchmark?: Record<string, unknown> | null;
+}
+
+export interface BenchmarkEventItem {
+  id: string;
+  timestamp: string;
+  agent_id: string;
+  tool_name: string;
+  outcome: string;
+  gateway_latency_ms: number;
+  threat_latency_ms: number;
+  threat_indicators_count: number;
+  threat_intel_details: Array<Record<string, unknown>>;
+  reasons: string[];
+  risk_score: number;
+}

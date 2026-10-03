@@ -23,6 +23,13 @@ class DecisionService:
             if risk.hard_signal_reason in {code.value for code in ReasonCode}:
                 hard_code = ReasonCode(risk.hard_signal_reason)
             reasons.append(Reason(code=hard_code, message=risk.hard_signal_reason or "Critical risk signal detected.", severity="critical", source="risk_engine"))
+
+        risk_dict = {
+            "score": risk.score,
+            "factors": risk.factors,
+            "threat_intel": risk.threat_intel_details,
+        }
+
         if reasons:
             return Decision(
                 decision=DecisionOutcome.BLOCK,
@@ -32,7 +39,7 @@ class DecisionService:
                 trace_id=trace_id,
                 execution_id=execution_id,
                 reasons=tuple(reasons),
-                risk={"score": risk.score, "factors": risk.factors},
+                risk=risk_dict,
                 parameter_result={"valid": parameters.valid},
             )
         if not task_consistent:
@@ -58,5 +65,5 @@ class DecisionService:
             trace_id=trace_id,
             execution_id=execution_id,
             reasons=tuple(reasons),
-            risk={"score": risk.score, "factors": risk.factors},
+            risk=risk_dict,
         )
