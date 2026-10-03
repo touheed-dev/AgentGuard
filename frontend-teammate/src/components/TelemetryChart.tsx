@@ -122,7 +122,7 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({
           <div>
             <div className="flex items-center justify-between text-[9px] uppercase tracking-widest mb-1.5" style={{ color: '#7A6F62' }}>
               <span>Execution Telemetry Vector ({sparkItems.length} traces)</span>
-              <span className="font-bold" style={{ color: '#047857' }}>0.00% POST-BLOCK</span>
+              <span className="font-bold" style={{ color: '#047857' }}>0 POST-BLOCK EXEC</span>
             </div>
             <div className="flex items-end gap-1 h-10 px-2 py-1.5 rounded-lg border overflow-x-hidden" style={{ background: '#E2DBD0', borderColor: '#D6CFC3' }}>
               {sparkItems.map((item, idx) => {

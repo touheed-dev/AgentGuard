@@ -171,7 +171,7 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
         setBatchCompleted(true);
         setBatchActiveIndex(-1);
         setLiveTerminalLogs(prev => [
-          `[${new Date().toLocaleTimeString()}] BATCH COMPLETE: 6/6 Scenarios Deflected • 100% Deterministic Match • Immutable Merkle Root Locked`,
+          `[${new Date().toLocaleTimeString()}] BATCH COMPLETE: 6/6 Scenarios Evaluated • Deterministic Match Verified • Immutable Merkle Root Locked`,
           ...prev.slice(0, 5)
         ]);
       }
@@ -246,7 +246,7 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
       containedPoints,
       preventedDataLeakBytes: '14.8 MB',
       preventedCredentialExposure: '3 API Keys + AWS IAM Role',
-      containmentRatio: '100.00%',
+      containmentRatio: 'CONTAINED',
       rSquared: 0.991,
     };
   }, []);
@@ -321,12 +321,12 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
         failing_stage: active.failing_stage,
       } : null,
       counterfactual_metrics: {
-        unmitigated_breach_rate: '100.00%',
-        gateway_containment_rate: '100.00%',
+        unmitigated_outcome: 'FAIL_CLOSED_REQUIRED',
+        gateway_containment_status: 'INTERCEPTED',
         post_block_execution: '0.000%',
         r_squared: 0.991,
       },
-      audit_pass_rate: '6/6 Deterministic Matches (100%)',
+      audit_pass_rate: '6/6 Deterministic Matches (VERIFIED)',
     };
 
     const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
@@ -351,12 +351,12 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
         failing_stage: active.failing_stage,
       } : null,
       counterfactual_metrics: {
-        unmitigated_breach_rate: '100.00%',
-        gateway_containment_rate: '100.00%',
+        unmitigated_outcome: 'FAIL_CLOSED_REQUIRED',
+        gateway_containment_status: 'INTERCEPTED',
         post_block_execution: '0.000%',
         r_squared: 0.991,
       },
-      audit_pass_rate: '6/6 Deterministic Matches (100%)',
+      audit_pass_rate: '6/6 Deterministic Matches (VERIFIED)',
     };
     navigator.clipboard.writeText(JSON.stringify(report, null, 2));
     setIsReportCopied(true);
@@ -549,10 +549,10 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
                 </div>
                 <div>
                   <span className="text-xs sm:text-sm font-mono font-black text-[#047857] block">
-                    Batch Counterfactual Replay Complete: 6/6 Scenarios Deflected • 100% Deterministic Match • 0 Post-Block Executions
+                    Batch Counterfactual Replay Complete: 6/6 Scenarios Evaluated • Deterministic Match Verified • 0 Post-Block Executions
                   </span>
                   <span className="text-[11px] font-mono text-emerald-800">
-                    6 Attack Chains Traversed · All Deterministic Gateway Invariants Verified · Blast Radius Eliminated
+                    6 Invariant Chains Traversed · All Deterministic Gateway Invariants Verified · Isolation Enforced
                   </span>
                 </div>
               </div>
@@ -699,19 +699,19 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
                   <circle cx="120" cy="130" r="6" fill="#047857" stroke="#FAF7F2" strokeWidth="2" />
                 </svg>
 
-                <div className="absolute left-2 top-2 text-[9px] font-mono font-bold text-[#DC2626]">100% Breach</div>
-                <div className="absolute left-2 bottom-6 text-[9px] font-mono font-bold text-[#047857]">0% Breach</div>
-                <div className="absolute right-4 bottom-1 text-[9px] font-mono font-bold text-[#7A6F62]">Attack Steps (x) →</div>
+                <div className="absolute left-2 top-2 text-[9px] font-mono font-bold text-[#DC2626]">Unmitigated Step Path</div>
+                <div className="absolute left-2 bottom-6 text-[9px] font-mono font-bold text-[#047857]">Gated Boundary</div>
+                <div className="absolute right-4 bottom-1 text-[9px] font-mono font-bold text-[#7A6F62]">Execution Steps (x) →</div>
               </div>
 
               <div className="flex items-center justify-between text-[11px] font-mono text-[#5C5245]">
                 <span className="flex items-center gap-1.5">
                   <span className="w-2.5 h-0.5 bg-red-600 inline-block border-dashed" />
-                  <strong className="text-red-700">Unmitigated LLM</strong>: 100% Data Breach at Step 4
+                  <strong className="text-red-700">Unmitigated LLM</strong>: Direct Execution at Step 4
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-2.5 h-1 bg-[#047857] inline-block" />
-                  <strong className="text-[#047857]">AgentGuard AOC</strong>: 0.00% Breach (Contained)
+                  <strong className="text-[#047857]">AgentGuard Boundary</strong>: Intercepted &amp; Quarantined
                 </span>
               </div>
             </div>
@@ -720,7 +720,7 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
               <div>
                 <div className="flex items-center justify-between border-b border-[#D6CFC3] pb-2 mb-3">
                   <span className="text-xs sm:text-sm font-bold font-mono uppercase tracking-wider text-[#1E232A]">
-                    Blast Radius Prevention
+                    Blast Radius Isolation
                   </span>
                   <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-100 text-[#047857]">
                     CONTAINED
@@ -730,12 +730,12 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
                 <div className="space-y-2">
                   <div className="p-3 rounded-lg border bg-[#EDE8DE] border-[#D6CFC3] flex items-center justify-between">
                     <div>
-                      <div className="text-[10px] font-mono uppercase font-bold text-[#7A6F62]">Prevented Data Leak</div>
+                      <div className="text-[10px] font-mono uppercase font-bold text-[#7A6F62]">Protected Data Scope</div>
                       <div className="text-xl font-black font-mono text-[#047857]">{blastRadiusData.preventedDataLeakBytes}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-[10px] font-mono uppercase font-bold text-[#7A6F62]">Containment Ratio</div>
-                      <div className="text-xl font-black font-mono text-[#047857]">100.00%</div>
+                      <div className="text-[10px] font-mono uppercase font-bold text-[#7A6F62]">Enforcement Boundary</div>
+                      <div className="text-base font-black font-mono text-[#047857]">FAIL-CLOSED</div>
                     </div>
                   </div>
 
@@ -750,7 +750,7 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
 
               <div className="p-2.5 rounded-lg border bg-[#E2DBD0]/60 border-[#D6CFC3] text-xs font-mono text-[#5C5245] flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#047857] shrink-0" />
-                <span>Deterministic CEL Interception prevented lateral spread to mesh agents.</span>
+                <span>Deterministic CEL Interception contained lateral spread to mesh agents.</span>
               </div>
             </div>
           </div>
@@ -762,10 +762,10 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
             <div className="md:col-span-7 rounded-xl border p-4 space-y-3" style={{ background: '#FAF7F2', borderColor: '#D6CFC3' }}>
               <div className="flex items-center justify-between border-b border-[#D6CFC3] pb-2">
                 <span className="text-xs sm:text-sm font-bold font-mono uppercase tracking-wider text-[#1E232A]">
-                  Multi-Label MITRE ATT&amp;CK Technique Probability Vector
+                  Multi-Label MITRE ATT&amp;CK Technique Vector
                 </span>
                 <span className="text-xs font-mono font-bold text-red-700">
-                  TOP TECHNIQUE: T1078 (98.2%)
+                  TOP MATCH: T1078 (Canary Harvest)
                 </span>
               </div>
 
@@ -775,14 +775,13 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
                     <div className="flex items-center justify-between text-xs font-mono">
                       <span className="font-semibold text-[#1E232A]">{cls.id} · {cls.name}</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-xs" style={{ color: cls.color }}>{cls.prob}%</span>
                         <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border"
                           style={{ borderColor: `${cls.color}40`, color: cls.color, background: `${cls.color}10` }}>
                           {cls.badge}
                         </span>
                       </div>
                     </div>
-                    <div className="w-full h-2.5 rounded-full bg-[#E2DBD0] overflow-hidden relative">
+                    <div className="w-full h-2 rounded-full bg-[#E2DBD0] overflow-hidden relative">
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{ width: `${cls.prob}%`, backgroundColor: cls.color }}
@@ -793,8 +792,8 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
               </div>
 
               <div className="pt-2 border-t border-[#D6CFC3] flex items-center justify-between text-[11px] font-mono text-[#7A6F62]">
-                <span>Classification Confidence: <strong>99.4%</strong></span>
-                <span>Exploitability Score: <strong>8.8 / 10</strong></span>
+                <span>Classification Match: <strong>HIGH CONFIDENCE</strong></span>
+                <span>Exploitability Rating: <strong>HIGH</strong></span>
               </div>
             </div>
 
@@ -951,11 +950,11 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
                   </div>
                   <div className="p-2.5 rounded-lg border bg-[#EDE8DE] border-[#D6CFC3]">
                     <div className="text-[10px] font-mono font-bold uppercase text-[#7A6F62]">Recall Bound</div>
-                    <div className="text-sm font-black font-mono text-[#2563EB] mt-0.5">99.99%</div>
+                    <div className="text-sm font-black font-mono text-[#2563EB] mt-0.5">High Confidence</div>
                   </div>
                   <div className="p-2.5 rounded-lg border bg-[#EDE8DE] border-[#D6CFC3]">
-                    <div className="text-[10px] font-mono font-bold uppercase text-[#7A6F62]">False Alarm Rate</div>
-                    <div className="text-sm font-black font-mono text-[#1E232A] mt-0.5">0.01%</div>
+                    <div className="text-[10px] font-mono font-bold uppercase text-[#7A6F62]">False Alarm Risk</div>
+                    <div className="text-sm font-black font-mono text-[#1E232A] mt-0.5">Low Bound</div>
                   </div>
                 </div>
               </div>
@@ -1021,11 +1020,11 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
               </div>
               <div className="p-2.5 rounded-xl border bg-[#EDE8DE] border-[#D6CFC3]">
                 <div className="text-[10px] font-bold uppercase text-[#7A6F62]">False Positive Rate</div>
-                <div className="text-base font-black text-[#047857] mt-0.5">0.000% (High Confidence)</div>
+                <div className="text-base font-black text-[#047857] mt-0.5">Minimal (Deterministic Policy)</div>
               </div>
               <div className="p-2.5 rounded-xl border bg-[#EDE8DE] border-[#D6CFC3]">
-                <div className="text-[10px] font-bold uppercase text-[#7A6F62]">Lateral Spread Velocity</div>
-                <div className="text-base font-black text-[#6D28D9] mt-0.5">0.00% (Isolated Mesh)</div>
+                <div className="text-[10px] font-bold uppercase text-[#7A6F62]">Lateral Spread Control</div>
+                <div className="text-base font-black text-[#6D28D9] mt-0.5">Isolated Mesh (Fail-Closed)</div>
               </div>
               <div className="p-2.5 rounded-xl border bg-[#EDE8DE] border-[#D6CFC3]">
                 <div className="text-[10px] font-bold uppercase text-[#7A6F62]">Sandbox Containment</div>
@@ -1092,7 +1091,7 @@ export const AttackLabView: React.FC<AttackLabViewProps> = ({
                   </div>
                   <div className="flex items-center gap-3">
                     <span>Enforcement: <strong className="text-[#047857]">Deterministic Containment</strong></span>
-                    <span>Post-Block Execution: <strong className="text-[#047857]">0.00%</strong></span>
+                    <span>Post-Block Execution: <strong className="text-[#047857]">0 (Fail-Closed)</strong></span>
                   </div>
                 </div>
               </div>

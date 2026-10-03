@@ -396,7 +396,7 @@ export const DemoWorkspaceView: React.FC<DemoWorkspaceViewProps> = ({
           </div>
 
           <div className="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between text-[11px] font-mono text-stone-600">
-            <span>Post-Block Exec Rate: <strong>0.00%</strong></span>
+            <span>Post-Block Executions: <strong>0 (Fail-Closed)</strong></span>
             <span>Deterministic Enforcement Boundary</span>
           </div>
         </div>

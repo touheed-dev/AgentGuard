@@ -800,7 +800,7 @@ export const PipelineDeepDiveView: React.FC<PipelineDeepDiveViewProps> = ({
                     <ShieldCheck className="w-4 h-4 text-[#047857]" />
                     <span className="font-semibold text-[#1E232A]">ROC-AUC Metric:</span>
                   </div>
-                  <span className="font-bold text-[#047857]">0.994 (FPR: 0.02% • TPR: 99.8%)</span>
+                  <span className="font-bold text-[#047857]">0.994 (Deterministic CEL Benchmark)</span>
                 </div>
               </div>
             </div>
@@ -920,7 +920,7 @@ export const PipelineDeepDiveView: React.FC<PipelineDeepDiveViewProps> = ({
 
                 <div className="p-2.5 rounded-lg border bg-[#E2DBD0]/60 border-[#D6CFC3] text-xs font-mono text-[#5C5245] flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#047857] shrink-0" />
-                  <span>Pipeline operates at <strong>92.8% below maximum allowable SLO boundary</strong>.</span>
+                  <span>Pipeline operates with high latency headroom (220µs p99 vs. 2,000µs limit).</span>
                 </div>
               </div>
             </div>

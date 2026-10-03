@@ -100,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       label: 'Runtime Integrity',
       sublabel: 'Autonomous Agent Monitor',
       icon: Shield,
-      badge: 'INTEGRITY 100%',
+      badge: 'ACTIVE',
       badgePulse: true,
       badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
       accentColor: '#059669',

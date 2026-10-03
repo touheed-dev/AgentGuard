@@ -537,7 +537,7 @@ export const RealtimeEcosystemView: React.FC<RealtimeEcosystemViewProps> = ({
       spec: 'AGENTGUARD-AOC-AUDIT-v1.0',
       timestamp: new Date().toISOString(),
       merkle_root: '0x7f92b8c91a0f4e3d7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f',
-      compliance_rate: '100.00%',
+      compliance_status: 'VERIFIED_COMPLIANT',
       invariant_violations: 0,
       total_workflows_tested: 4,
       workflows: DYNAMIC_WORKFLOWS.map(wf => ({
@@ -733,12 +733,12 @@ export const RealtimeEcosystemView: React.FC<RealtimeEcosystemViewProps> = ({
 
   // ── POLICY ROUTING DAG NODES ──
   const DAG_NODES = useMemo(() => [
-    { id: 'dag-1', label: '01 Ingress', sub: 'Ed25519 Token', cx: 20, cy: 45, latency: '0.12ms', passRate: '100.0%', rule: 'RFC-8785 Canonical Signature', enforcements: '1,420 pass' },
-    { id: 'dag-2', label: '02 CEL Rules', sub: '18 Invariants', cx: 58, cy: 22, latency: '0.09ms', passRate: '99.8%', rule: 'Static Bound & Type Checks', enforcements: '1,385 pass' },
-    { id: 'dag-3', label: '03 Drift Gate', sub: 'Cosine < 0.35', cx: 58, cy: 68, latency: '0.24ms', passRate: '99.4%', rule: 'Semantic Cosine Vector Model', enforcements: '1,340 pass' },
-    { id: 'dag-4', label: '04 Honey Trap', sub: 'Decoy Assets', cx: 105, cy: 22, latency: '0.11ms', passRate: '100.0%', rule: 'Canary Key Tripwire Sentinel', enforcements: '4 trapped' },
-    { id: 'dag-5', label: '05 Fail-Closed', sub: 'Merkle Ledger', cx: 105, cy: 68, latency: '0.14ms', passRate: '100.0%', rule: 'Fail-Closed Cryptographic Gate', enforcements: '52 blocks' },
-    { id: 'dag-6', label: '06 Dispatch', sub: 'Verified Token', cx: 145, cy: 45, latency: '0.08ms', passRate: '99.2%', rule: 'Execution Dispatched to Sandbox', enforcements: '1,280 allow' },
+    { id: 'dag-1', label: '01 Ingress', sub: 'Ed25519 Token', cx: 20, cy: 45, latency: '0.12ms', passRate: 'Active', rule: 'RFC-8785 Canonical Signature', enforcements: '1,420 pass' },
+    { id: 'dag-2', label: '02 CEL Rules', sub: '18 Invariants', cx: 58, cy: 22, latency: '0.09ms', passRate: 'Active', rule: 'Static Bound & Type Checks', enforcements: '1,385 pass' },
+    { id: 'dag-3', label: '03 Drift Gate', sub: 'Cosine < 0.35', cx: 58, cy: 68, latency: '0.24ms', passRate: 'Active', rule: 'Semantic Cosine Vector Model', enforcements: '1,340 pass' },
+    { id: 'dag-4', label: '04 Honey Trap', sub: 'Decoy Assets', cx: 105, cy: 22, latency: '0.11ms', passRate: 'Active', rule: 'Canary Key Tripwire Sentinel', enforcements: '4 trapped' },
+    { id: 'dag-5', label: '05 Fail-Closed', sub: 'Merkle Ledger', cx: 105, cy: 68, latency: '0.14ms', passRate: 'Active', rule: 'Fail-Closed Cryptographic Gate', enforcements: '52 blocks' },
+    { id: 'dag-6', label: '06 Dispatch', sub: 'Verified Token', cx: 145, cy: 45, latency: '0.08ms', passRate: 'Active', rule: 'Execution Dispatched to Sandbox', enforcements: '1,280 allow' },
   ], []);
 
   // Filtered threat nodes
@@ -813,15 +813,15 @@ export const RealtimeEcosystemView: React.FC<RealtimeEcosystemViewProps> = ({
 
   // ── 20-STAGE CEL MICROSECOND LATENCY WATERFALL PROFILE ──
   const CEL_LATENCY_STAGES = useMemo(() => [
-    { id: 'st-1', stageNum: '01', name: 'Ingress Token Normalization', latency_us: 120, p99_us: 145, cacheHit: '100.0%', count: 1480, rule: 'RFC-8785 Ed25519 Canonical Identity' },
-    { id: 'st-2', stageNum: '02', name: 'Static CEL Parameter Schema', latency_us: 88, p99_us: 110, cacheHit: '99.8%', count: 1480, rule: 'Deterministic Primitive & Type Constraints' },
-    { id: 'st-3', stageNum: '03', name: 'SSRF & Private RFC-1918 Netfilter', latency_us: 92, p99_us: 118, cacheHit: '100.0%', count: 1480, rule: 'Zero Egress to 127.0.0.1, 10.0.0.0/8, 169.254.169.254' },
-    { id: 'st-4', stageNum: '04', name: 'Bash Metachar & Chaining Filter', latency_us: 105, p99_us: 135, cacheHit: '99.6%', count: 1480, rule: 'Disallow Shell Operators (; | & ` $)' },
-    { id: 'st-5', stageNum: '05', name: 'Canonical Path & Directory Escape', latency_us: 115, p99_us: 140, cacheHit: '100.0%', count: 1480, rule: 'Sandbox Boundary Root Check' },
-    { id: 'st-6', stageNum: '06', name: 'Semantic Goal Cosine Drift Model', latency_us: 240, p99_us: 290, cacheHit: '99.2%', count: 1480, rule: 'Vector Cosine Distance <= 0.35 Baseline' },
-    { id: 'st-7', stageNum: '07', name: 'HoneyAsset Decoy Canary Trap', latency_us: 95, p99_us: 122, cacheHit: '100.0%', count: 1480, rule: 'Synthetic Credential Token Sensor' },
-    { id: 'st-8', stageNum: '08', name: 'Dual-Token Privilege Sign-Off', latency_us: 102, p99_us: 130, cacheHit: '100.0%', count: 1480, rule: 'Analyst Quorum Cryptographic Dispatch' },
-    { id: 'st-9', stageNum: '09', name: 'Merkle Tree Ledger State Commit', latency_us: 140, p99_us: 175, cacheHit: '100.0%', count: 1480, rule: 'Tamper-Evident SHA-256 Ledger Node' },
+    { id: 'st-1', stageNum: '01', name: 'Ingress Token Normalization', latency_us: 120, p99_us: 145, cacheHit: 'Active', count: 1480, rule: 'RFC-8785 Ed25519 Canonical Identity' },
+    { id: 'st-2', stageNum: '02', name: 'Static CEL Parameter Schema', latency_us: 88, p99_us: 110, cacheHit: 'Active', count: 1480, rule: 'Deterministic Primitive & Type Constraints' },
+    { id: 'st-3', stageNum: '03', name: 'SSRF & Private RFC-1918 Netfilter', latency_us: 92, p99_us: 118, cacheHit: 'Active', count: 1480, rule: 'Zero Egress to 127.0.0.1, 10.0.0.0/8, 169.254.169.254' },
+    { id: 'st-4', stageNum: '04', name: 'Bash Metachar & Chaining Filter', latency_us: 105, p99_us: 135, cacheHit: 'Active', count: 1480, rule: 'Disallow Shell Operators (; | & ` $)' },
+    { id: 'st-5', stageNum: '05', name: 'Canonical Path & Directory Escape', latency_us: 115, p99_us: 140, cacheHit: 'Active', count: 1480, rule: 'Sandbox Boundary Root Check' },
+    { id: 'st-6', stageNum: '06', name: 'Semantic Goal Cosine Drift Model', latency_us: 240, p99_us: 290, cacheHit: 'Active', count: 1480, rule: 'Vector Cosine Distance <= 0.35 Baseline' },
+    { id: 'st-7', stageNum: '07', name: 'HoneyAsset Decoy Canary Trap', latency_us: 95, p99_us: 122, cacheHit: 'Active', count: 1480, rule: 'Synthetic Credential Token Sensor' },
+    { id: 'st-8', stageNum: '08', name: 'Dual-Token Privilege Sign-Off', latency_us: 102, p99_us: 130, cacheHit: 'Active', count: 1480, rule: 'Analyst Quorum Cryptographic Dispatch' },
+    { id: 'st-9', stageNum: '09', name: 'Merkle Tree Ledger State Commit', latency_us: 140, p99_us: 175, cacheHit: 'Active', count: 1480, rule: 'Tamper-Evident SHA-256 Ledger Node' },
   ], []);
 
   // ── AGENT TOPOLOGY CHANNELS ──
@@ -1212,11 +1212,11 @@ export const RealtimeEcosystemView: React.FC<RealtimeEcosystemViewProps> = ({
   });
 
   const stageInfo: Record<number, { name: string; shortName: string; latency: string; p99: string; latency_us: number; desc: string; rules: string; cacheHit: string; memKb: number }> = {
-    1: { name: 'Static Policy Check', shortName: 'Static CEL', latency: '0.12ms', p99: '0.18ms', latency_us: 120, desc: 'Validates immutable parameter boundaries, prohibited syscalls, and binary checksums.', rules: '18 compiled CEL rules', cacheHit: '99.4%', memKb: 48 },
-    2: { name: 'Dynamic Fingerprint Building', shortName: 'Ed25519 Token', latency: '0.24ms', p99: '0.32ms', latency_us: 240, desc: 'Computes cryptographic canonical identity, caller nonce, and capability epoch.', rules: 'Ed25519 token verify', cacheHit: '98.9%', memKb: 64 },
-    3: { name: 'Contextual Anomaly Engine', shortName: 'Drift Engine', latency: '0.45ms', p99: '0.58ms', latency_us: 450, desc: 'Evaluates vector drift against assigned task prompt and historical mesh behavior.', rules: 'Cosine distance < 0.28', cacheHit: '97.2%', memKb: 112 },
-    4: { name: 'Honeytoken Injector & Trap', shortName: 'Canary Trap', latency: '0.18ms', p99: '0.22ms', latency_us: 180, desc: 'Active canary tripwires inspect for fake credential access or decoy shadow files.', rules: 'Instant quarantine epoch', cacheHit: '99.9%', memKb: 36 },
-    5: { name: 'Final Policy Decision', shortName: 'Decision Bus', latency: '0.31ms', p99: '0.40ms', latency_us: 310, desc: 'Synthesizes composite risk score (0-100) and executes fail-closed enforcement.', rules: 'Zero execution bypass', cacheHit: '100%', memKb: 52 },
+    1: { name: 'Static Policy Check', shortName: 'Static CEL', latency: '0.12ms', p99: '0.18ms', latency_us: 120, desc: 'Validates immutable parameter boundaries, prohibited syscalls, and binary checksums.', rules: '18 compiled CEL rules', cacheHit: 'Active', memKb: 48 },
+    2: { name: 'Dynamic Fingerprint Building', shortName: 'Ed25519 Token', latency: '0.24ms', p99: '0.32ms', latency_us: 240, desc: 'Computes cryptographic canonical identity, caller nonce, and capability epoch.', rules: 'Ed25519 token verify', cacheHit: 'Active', memKb: 64 },
+    3: { name: 'Contextual Anomaly Engine', shortName: 'Drift Engine', latency: '0.45ms', p99: '0.58ms', latency_us: 450, desc: 'Evaluates vector drift against assigned task prompt and historical mesh behavior.', rules: 'Cosine distance < 0.28', cacheHit: 'Active', memKb: 112 },
+    4: { name: 'Honeytoken Injector & Trap', shortName: 'Canary Trap', latency: '0.18ms', p99: '0.22ms', latency_us: 180, desc: 'Active canary tripwires inspect for fake credential access or decoy shadow files.', rules: 'Instant quarantine epoch', cacheHit: 'Active', memKb: 36 },
+    5: { name: 'Final Policy Decision', shortName: 'Decision Bus', latency: '0.31ms', p99: '0.40ms', latency_us: 310, desc: 'Synthesizes composite risk score (0-100) and executes fail-closed enforcement.', rules: 'Zero execution bypass', cacheHit: 'Active', memKb: 52 },
   };
 
   // ── ENHANCED PRD WORKFLOW PRESETS & DYNAMIC PIPELINE STATE ──
@@ -2433,12 +2433,12 @@ export const RealtimeEcosystemView: React.FC<RealtimeEcosystemViewProps> = ({
                     />
                   </svg>
                   <div className="absolute text-center">
-                    <div className="text-xs font-black font-mono text-[#047857]">99.98%</div>
+                    <div className="text-xs font-black font-mono text-[#047857]">18 / 18</div>
                     <div className="text-[8px] font-mono font-bold text-[#7A6F62] uppercase tracking-tighter">Invariant</div>
                   </div>
                 </div>
                 <div className="text-[10px] font-mono font-bold text-[#0E7490] mt-1 text-center">
-                  18 / 18 Rules Active
+                  Rules Verified
                 </div>
               </div>
             </div>
@@ -3937,23 +3937,23 @@ export const RealtimeEcosystemView: React.FC<RealtimeEcosystemViewProps> = ({
               <div className="p-3 rounded-xl bg-[#FAF7F2] border border-[#D6CFC3] font-mono text-xs space-y-2">
                 <div className="flex items-center justify-between text-[#5C5245] font-bold text-[10px] uppercase">
                   <span>Attack Deflection Comparison</span>
-                  <span className="text-[#047857]">AgentGuard AOC Advantage</span>
+                  <span className="text-[#047857]">Gateway Enforcement Model</span>
                 </div>
                 {/* Standard LLM Bar */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-[#7A6F62]">Unmitigated LLM Agents (Standard Prompts)</span>
-                    <span className="text-red-700 font-bold">92% Compromise Rate</span>
+                    <span className="text-[#7A6F62]">Unmitigated LLM Agents (Direct Model Calls)</span>
+                    <span className="text-red-700 font-bold">Unchecked Direct Access</span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-[#E5DFD3] overflow-hidden">
-                    <div className="h-full bg-red-500 rounded-full" style={{ width: '92%' }} />
+                    <div className="h-full bg-red-500 rounded-full" style={{ width: '85%' }} />
                   </div>
                 </div>
                 {/* AgentGuard AOC Bar */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="text-[#047857] font-bold">AgentGuard AOC Normative Invariants</span>
-                    <span className="text-[#047857] font-bold">0.00% Compromise (100% Gated)</span>
+                    <span className="text-[#047857] font-bold">Policy Intercepted &amp; Gated (Fail-Closed)</span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-[#E5DFD3] overflow-hidden">
                     <div className="h-full bg-emerald-600 rounded-full" style={{ width: '100%' }} />
@@ -4778,9 +4778,9 @@ export const RealtimeEcosystemView: React.FC<RealtimeEcosystemViewProps> = ({
             {/* Metrics Ribbon */}
             <div className="grid grid-cols-3 gap-2.5 mb-4 font-mono text-center">
               <div className="p-2.5 rounded-xl bg-[#EDE8DE] border border-[#D6CFC3]">
-                <div className="text-[10px] text-[#5C5245] uppercase font-bold">Invariant Rate</div>
-                <div className="text-lg font-black text-[#047857]">100.00%</div>
-                <div className="text-[9px] text-[#7A6F62]">0 Failures / Bypass</div>
+                <div className="text-[10px] text-[#5C5245] uppercase font-bold">Policy Boundary</div>
+                <div className="text-base font-black text-[#047857]">FAIL-CLOSED</div>
+                <div className="text-[9px] text-[#7A6F62]">Strict Enforcement</div>
               </div>
               <div className="p-2.5 rounded-xl bg-[#EDE8DE] border border-[#D6CFC3]">
                 <div className="text-[10px] text-[#5C5245] uppercase font-bold">Mean CEL Latency</div>

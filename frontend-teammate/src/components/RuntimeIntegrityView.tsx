@@ -543,7 +543,7 @@ export const RuntimeIntegrityView: React.FC<RuntimeIntegrityViewProps> = ({
             <div className={`px-2.5 py-1 rounded-lg border transition-all ${
               haltingAnimationState.step >= 4 ? 'bg-red-700 text-white border-red-800 shadow-md ring-2 ring-red-400 animate-pulse' : 'bg-red-100 text-red-400 border-red-200'
             }`}>
-              4. Circuit Halt (0.00% Bypass)
+              4. Circuit Halt &amp; Revocation (Deterministic)
             </div>
           </div>
         </div>
@@ -554,22 +554,22 @@ export const RuntimeIntegrityView: React.FC<RuntimeIntegrityViewProps> = ({
           ══════════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
 
-        {/* Card 1: Network Integrity Index */}
+        {/* Card 1: Network Integrity Posture */}
         <div className="cyber-card p-3.5 flex flex-col justify-between bg-[#EDE8DE] border-[#D6CFC3] hover:shadow-lg transition-all hover:scale-[1.01]">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono text-[#5C5245] uppercase tracking-wider font-extrabold flex items-center gap-2">
-              <span className={`w-2.5 h-2.5 rounded-full ${networkHealthScore > 90 ? 'bg-emerald-600 shadow-[0_0_8px_#059669]' : 'bg-red-600 shadow-[0_0_8px_#DC2626]'} animate-pulse`} />
-              NETWORK INTEGRITY
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shadow-[0_0_8px_#059669] animate-pulse" />
+              RUNTIME POSTURE
             </span>
             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-[#047857] border border-emerald-300">
-              CONTINUOUS
+              SYNCHRONIZED
             </span>
           </div>
-          <div className="text-3xl font-extrabold font-mono text-[#047857] my-2 tabular-nums">
-            {networkHealthScore.toFixed(1)}%
+          <div className="text-2xl sm:text-3xl font-extrabold font-mono text-[#047857] my-2">
+            ACTIVE MESH
           </div>
           <div className="text-xs font-mono text-[#5C5245] leading-relaxed">
-            Zero uncontained deviations across 8 active multi-agent nodes.
+            Continuous behavioral invariant verification across 8 multi-agent nodes.
           </div>
           <div className="text-xs font-mono text-[#047857] font-bold flex items-center justify-between mt-1 pt-1.5 border-t border-[#D6CFC3]">
             <span className="flex items-center gap-1">
@@ -639,9 +639,9 @@ export const RuntimeIntegrityView: React.FC<RuntimeIntegrityViewProps> = ({
               FAIL-CLOSED
             </span>
           </div>
-          <div className="text-3xl font-extrabold font-mono text-[#B45309] my-2 tabular-nums flex items-center gap-2">
-            <span>0.00%</span>
-            <span className="text-xs font-mono font-normal text-[#5C5245]">bypass rate</span>
+          <div className="text-2xl sm:text-3xl font-extrabold font-mono text-[#B45309] my-2 flex items-center gap-2">
+            <span>ARMED</span>
+            <span className="text-xs font-mono font-normal text-[#5C5245]">deterministic boundary</span>
           </div>
           <div className="text-xs font-mono text-[#5C5245] leading-relaxed">
             Immediate dispatch token revocation upon detected deviation.

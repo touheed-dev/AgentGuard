@@ -20,11 +20,11 @@ interface CheckpointsViewProps {
 }
 
 const MILESTONE_SPECS = [
-  { id: 'M1', name: 'Fail-Closed Pre-Execution Interception', standard: 'FR-1 / FR-2', metricKey: 'post_block_rate', metricVal: '0.00%', icon: ShieldCheck },
+  { id: 'M1', name: 'Fail-Closed Pre-Execution Interception', standard: 'FR-1 / FR-2', metricKey: 'post_block_rate', metricVal: 'Zero Bypass', icon: ShieldCheck },
   { id: 'M2', name: 'Zero Post-Block Execution Invariant', standard: 'FR-1 Containment', metricKey: 'sandbox_enforced', metricVal: 'Docker net=none', icon: Database },
   { id: 'M3', name: 'Ed25519 Cryptographic Capability Tokens', standard: 'FR-4 / FR-5 Identity', metricKey: 'algorithm', metricVal: 'Ed25519 (256-bit)', icon: Fingerprint },
   { id: 'M4', name: 'RFC-8785 Canonical Ledger Hash Chain', standard: 'FR-18 Audit Trail', metricKey: 'hash_standard', metricVal: 'SHA-256 Merkle', icon: Lock },
-  { id: 'M5', name: 'Attack Lab Counterfactual Replay Suite', standard: 'FR-19 Replay', metricKey: 'pass_rate', metricVal: '100% Deterministic', icon: Sparkles },
+  { id: 'M5', name: 'Attack Lab Counterfactual Replay Suite', standard: 'FR-19 Replay', metricKey: 'pass_rate', metricVal: 'Verified Match', icon: Sparkles },
 ];
 
 interface AuditLogEntry {
@@ -289,13 +289,13 @@ export const CheckpointsView: React.FC<CheckpointsViewProps> = ({
 
     const auditPhases = [
       'Phase 1/6: Establishing RFC-8785 Canonical JSON Pipeline...',
-      'Phase 2/6: Verifying M1: Fail-Closed Pre-Execution Interception (0.00% Post-Block)...',
+      'Phase 2/6: Verifying M1: Fail-Closed Pre-Execution Interception (Zero Post-Block)...',
       'Phase 3/6: Verifying M2: Zero Post-Block Container Enforceability (Network=None)...',
       'Phase 4/6: Verifying M3: Ed25519 Capability Tokens & Nonce Freshness...',
       'Phase 5/6: Verifying M4: SHA-256 Merkle Ledger Cryptographic Hash Chain...',
       'Phase 6/6: Verifying M5: Attack Lab Counterfactual Replay Suite (6/6 Deterministic)...',
       'Finalizing Global Merkle Root: 0x9f86d081884c7d659a2feaa0c55a...',
-      'Cryptographic Invariant Proof 100% Verified ✓',
+      'Cryptographic Invariant Proof Verified ✓',
     ];
 
     let currentPhase = 0;
@@ -327,7 +327,7 @@ export const CheckpointsView: React.FC<CheckpointsViewProps> = ({
         id: m.id,
         name: m.name,
         standard: m.standard,
-        status: '100% VERIFIED',
+        status: 'RFC-8785 VERIFIED',
         metric: `${m.metricKey}: ${m.metricVal}`,
       })),
       checkpoint: selected ? {
@@ -447,7 +447,7 @@ export const CheckpointsView: React.FC<CheckpointsViewProps> = ({
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-[#047857]" />
             <span className="text-[#7A6F62]">Tamper Resistance:</span>
-            <strong className="text-[#047857]">100.00% Valid</strong>
+            <strong className="text-[#047857]">Cryptographically Valid</strong>
           </div>
         </div>
 
@@ -880,7 +880,7 @@ export const CheckpointsView: React.FC<CheckpointsViewProps> = ({
               {timeTravelBlock * 8 + 4}
             </div>
             <div className="text-[9px] font-mono text-[#5C5245] mt-0.5">
-              100% Intercepted
+              Gated (Fail-Closed)
             </div>
           </div>
         </div>

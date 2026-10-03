@@ -163,7 +163,7 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({ decision, 
                   ['TRACE ID', decision.trace_id, 'text-slate-200'],
                   ['BLOCK INDEX', `#${decision.block_index ?? 0}`, 'text-cyan-400'],
                   ['HONEYPOT TOUCHED', decision.honeypot_triggered ? 'YES — STAGE 5 CONTAINMENT' : 'NO (Clean)', decision.honeypot_triggered ? 'text-red-400 font-bold' : 'text-emerald-400'],
-                  ['POST-BLOCK EXEC', 'NO (Guaranteed 0.00%)', 'text-emerald-400 font-bold'],
+                  ['POST-BLOCK EXEC', 'NO (0 Executions)', 'text-emerald-400 font-bold'],
                 ].map(([label, val, cls]) => (
                   <div key={label as string} className="flex items-center justify-between">
                     <span className="text-slate-500">{label}:</span>
@@ -186,8 +186,8 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({ decision, 
                   <div className="font-bold text-cyan-400">Block #{decision.block_index ?? 0}</div>
                 </div>
                 <div className="pt-2 border-t border-slate-800">
-                  <div className="text-[9px] uppercase tracking-widest mb-1 text-slate-500">Post-Block Execution Rate</div>
-                  <div className="font-bold text-emerald-400">0.00% — Guaranteed Zero-Byte</div>
+                  <div className="text-[9px] uppercase tracking-widest mb-1 text-slate-500">Post-Block Execution Status</div>
+                  <div className="font-bold text-emerald-400">0 Executions (Fail-Closed)</div>
                 </div>
               </div>
 
