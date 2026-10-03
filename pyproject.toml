@@ -33,6 +33,9 @@ quality = [
     "ruff>=0.8,<1",
 ]
 
+[tool.setuptools.packages.find]
+include = ["backend*"]
+
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]
 addopts = "-q"

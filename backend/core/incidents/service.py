@@ -34,10 +34,26 @@ class Incident:
     dedup_key: str = ""
 
 
+@dataclass(frozen=True)
+class SecuritySOSEvent:
+    event_id: str
+    incident_id: str
+    agent_id: str
+    task_id: str
+    trace_id: str
+    reason_code: str
+    severity: str
+    timestamp: float
+    details: dict[str, Any] = field(default_factory=dict)
+    event_type: str = "security.sos"
+
+
 class IncidentService:
     def __init__(self) -> None:
         self._incidents: dict[str, Incident] = {}
         self._dedup_map: dict[str, str] = {}
+        self._sos_events: list[SecuritySOSEvent] = []
+        self._subscribers: list[Any] = []
 
     def create(
         self,
@@ -70,6 +86,26 @@ class IncidentService:
         )
         self._incidents[incident_id] = incident
         self._dedup_map[dedup_key] = incident_id
+
+        if severity == "critical":
+            sos = SecuritySOSEvent(
+                event_id=str(uuid4()),
+                incident_id=incident_id,
+                agent_id=agent_id,
+                task_id=task_id,
+                trace_id=trace_id,
+                reason_code=reason_code,
+                severity=severity,
+                timestamp=incident.created_at,
+                details=details or {},
+            )
+            self._sos_events.append(sos)
+            for sub in list(self._subscribers):
+                try:
+                    sub(sos)
+                except Exception:
+                    pass
+
         return incident
 
     def transition(self, incident_id: str, new_state: IncidentState) -> Incident:
@@ -96,3 +132,16 @@ class IncidentService:
 
     def list(self) -> tuple[Incident, ...]:
         return tuple(self._incidents.values())
+
+    def get_sos_events(self) -> tuple[SecuritySOSEvent, ...]:
+        return tuple(self._sos_events)
+
+    def add_sos_subscriber(self, callback: Any) -> None:
+        self._subscribers.append(callback)
+
+    def remove_sos_subscriber(self, callback: Any) -> None:
+        if callback in self._subscribers:
+            self._subscribers.remove(callback)
+
+    def clear_sos_events(self) -> None:
+        self._sos_events.clear()

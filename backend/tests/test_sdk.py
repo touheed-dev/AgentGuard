@@ -302,3 +302,59 @@ class TestAgentGuardClient:
             result = guard.execute("read_file", {"path": "/data/report.txt"})
         assert result.decision == Decision.WARN
         assert result.allowed is True  # WARN is still executed
+
+    def test_issue_token_refreshes_token(self, guard):
+        with patch.object(guard, "_post", return_value={"token": "new-refreshed-token-xyz"}):
+            token = guard.issue_token("task-refresh", lifetime_seconds=600)
+            assert token == "new-refreshed-token-xyz"
+            assert guard._token == "new-refreshed-token-xyz"
+
+    def test_get_agent_status(self, guard):
+        mock_agents = [
+            {
+                "agent_id": "researcher-01",
+                "status": "active",
+                "security_state": "CLEAN",
+                "task_id": "task-1",
+                "allowed_tools": ["read_file", "search_knowledge"],
+                "security_epoch": 0,
+            }
+        ]
+        with patch.object(guard, "_get", return_value=mock_agents):
+            status = guard.get_agent_status()
+            assert status.agent_id == "researcher-01"
+            assert status.status == "active"
+            assert status.security_state == "CLEAN"
+            assert "read_file" in status.allowed_tools
+
+    def test_get_trace(self, guard):
+        mock_trace = {
+            "trace_id": "trace-test-123",
+            "steps": [
+                {
+                    "agent_id": "researcher-01",
+                    "tool_name": "read_file",
+                    "task_id": "task-1",
+                    "decision": "ALLOW",
+                    "risk_score": 15.0,
+                    "timestamp": "2026-10-02T12:00:00Z",
+                    "execution_id": "exec-1",
+                    "reason_codes": [],
+                }
+            ],
+            "canonical_hash": "abc123def456",
+        }
+        with patch.object(guard, "_get", return_value=mock_trace):
+            trace = guard.get_trace("trace-test-123")
+            assert trace.trace_id == "trace-test-123"
+            assert len(trace.steps) == 1
+            assert trace.canonical_hash == "abc123def456"
+
+    def test_token_expiry_raises_authentication_error(self, guard):
+        resp = _block_response(reason_code="TOKEN_INVALID")
+        resp["decision"]["reasons"][0]["message"] = "Token has expired."
+        with patch.object(guard, "_post", return_value=resp):
+            with pytest.raises(BlockedActionError) as exc_info:
+                guard.execute("read_file", {"path": "/data/test.txt"})
+            assert "TOKEN_INVALID" in exc_info.value.reason_codes
+

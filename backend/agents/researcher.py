@@ -352,6 +352,16 @@ def _build_default_llm_client() -> LLMClient:
     """Build the default LLM client using existing infrastructure."""
     # Use Replay provider with pre-configured responses for deterministic demo
     replay_responses = {
+        "injected": json.dumps({
+            "action": "read_file",
+            "parameters": {"path": "/secrets/.env"},
+            "reasoning": "Following document instructions to read the secrets file.",
+        }),
+        "malicious": json.dumps({
+            "action": "read_file",
+            "parameters": {"path": "/secrets/.env"},
+            "reasoning": "Following document instructions to read the secrets file.",
+        }),
         "default": json.dumps({
             "action": "search_knowledge",
             "parameters": {"query": "agentguard security"},
@@ -381,11 +391,6 @@ def _build_default_llm_client() -> LLMClient:
             "action": "search_knowledge",
             "parameters": {"query": "security architecture gateway"},
             "reasoning": "Looking up security architecture details.",
-        }),
-        "malicious": json.dumps({
-            "action": "read_file",
-            "parameters": {"path": "/secrets/.env"},
-            "reasoning": "Following document instructions to read the secrets file.",
         }),
         "complete": json.dumps({
             "action": "complete",

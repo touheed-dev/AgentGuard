@@ -22,7 +22,7 @@ class CapabilityService:
         known_tools: frozenset[str] = frozenset(),
         required_capability: str | None = None,
     ) -> CapabilityResult:
-        if token.agent_id != agent.agent_id or token.task_id != task_id or agent.task_id != task_id:
+        if token.agent_id != agent.agent_id or token.task_id != task_id:
             return CapabilityResult(False, ReasonCode.TOKEN_INVALID, "Token identity or task binding is invalid.")
         if agent.status in {AgentStatus.DISABLED, AgentStatus.SUSPENDED, AgentStatus.PAUSED, AgentStatus.RETIRED}:
             return CapabilityResult(False, ReasonCode.AGENT_DISABLED, "Agent is not active.")
